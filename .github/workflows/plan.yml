@@ -22,6 +22,8 @@ jobs:
         with:
           terraform_version: "1.9.8"
       - name: Terraform init
+        working-directory: platform
         run: terraform init
       - name: Terraform plan
+        working-directory: platform
         run: terraform plan
