@@ -1,0 +1,23 @@
+name: Check Access AWS
+on:
+  push
+env:
+  AWS_REGION : "ap-northeast-1"
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  LsS3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions
+          role-session-name: MyGithubActionsSession
+          aws-region: ${{ env.AWS_REGION }}
+      - name: s3 ls
+        run: |
+          aws s3 ls
