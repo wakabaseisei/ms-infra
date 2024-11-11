@@ -1,0 +1,29 @@
+name: terraform plan
+on:
+  pull_request
+env:
+  AWS_REGION : "ap-northeast-1"
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions
+          role-session-name: MyGithubActionsSession
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: Terraform init
+        working-directory: platform
+        run: terraform init
+      - name: Terraform plan
+        working-directory: platform
+        run: terraform plan
