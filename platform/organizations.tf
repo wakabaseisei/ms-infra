@@ -22,10 +22,3 @@ resource "aws_organizations_account" "audit" {
   parent_id         = aws_organizations_organizational_unit.security.id
   close_on_deletion = true
 }
-
-resource "aws_organizations_account" "log_archive" {
-  name              = "Log-Archive"
-  email             = "wakabaseisei+log-archive@gmail.com"
-  parent_id         = aws_organizations_organizational_unit.security.id
-  close_on_deletion = true
-}
