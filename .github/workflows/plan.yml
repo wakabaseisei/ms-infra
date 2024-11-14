@@ -7,23 +7,55 @@ permissions:
   id-token: write
   contents: read
 jobs:
+  determine-workdir:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    outputs:
+      workdirs: ${{ steps.filter.outputs.workdirs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        with:
+          filters: .github/path-filter.yml
+
+      - name: filter
+        id: filter
+        run: |
+          WORKDIRS=$(echo '${{ toJSON(steps.changes.outputs) }}' | jq '. | to_entries[] | select(.value == "true") | .key') 
+          echo "workdirs=$(echo $WORKDIRS | jq -sc '.')" >> $GITHUB_OUTPUT
   plan:
     runs-on: ubuntu-latest
+    needs: determine-workdir
+    if: needs.determine-workdir.outputs.workdirs != '[]'
+    strategy:
+      matrix:
+        workdir: ${{ fromJSON(needs.determine-workdir.outputs.workdirs) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set environment variables for each env
+        run: |
+          ENV=$(echo "${{ matrix.workdir }}" | cut -d '/' -f1)
+          yq "with_entries(select(.key == \"$ENV\")) | .$ENV" .github/path-to-account-map.yml -o props | tr -d " " >> $GITHUB_ENV
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github_actions
+          role-to-assume: arn:aws:iam::${{ secrets[env.AWS_ACCOUNT_ID] }}:role/github_actions
           role-session-name: MyGithubActionsSession
           aws-region: ${{ env.AWS_REGION }}
       - name: Setup terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: "1.9.8"
       - name: Terraform init
         working-directory: platform
         run: terraform init
+        working-directory: ${{ matrix.workdir }}
       - name: Terraform plan
         working-directory: platform
         run: terraform plan
+        working-directory: ${{ matrix.workdir }}
