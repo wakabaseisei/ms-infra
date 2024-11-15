@@ -76,7 +76,7 @@ jobs:
         run: terraform apply -auto-approve
         working-directory: ${{ matrix.workdir }}
   post-terraform:
-    name: All tests passed
+    name: All jobs passed
     if: success()
     runs-on: ubuntu-latest
     needs: plan-and-apply
