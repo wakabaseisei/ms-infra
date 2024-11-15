@@ -75,10 +75,9 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: terraform apply -auto-approve
         working-directory: ${{ matrix.workdir }}
-  post-terraform:
-    name: All jobs passed
+  status-check:
     needs: [determine-workdir, plan-and-apply]
-    if: success()
+    if: failure()
     runs-on: ubuntu-latest
     steps:
-      - run: echo ok
+      - run: exit 1
