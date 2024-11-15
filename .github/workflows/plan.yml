@@ -78,6 +78,7 @@ jobs:
   post-terraform:
     name: All jobs passed
     needs: [determine-workdir, plan-and-apply]
+    if: success()
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
