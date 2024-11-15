@@ -52,8 +52,8 @@ jobs:
         with:
           terraform_version: "1.9.8"
       - name: Terraform init
-        working-directory: platform
         run: terraform init
+        working-directory: ${{ matrix.workdir }}
       - name: Terraform plan
-        working-directory: platform
         run: terraform plan
+        working-directory: ${{ matrix.workdir }}
