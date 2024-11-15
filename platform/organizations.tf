@@ -15,10 +15,3 @@ resource "aws_organizations_organizational_unit" "security" {
   name      = "Security"
   parent_id = aws_organizations_organizational_unit.foundational.id
 }
-
-resource "aws_organizations_account" "audit" {
-  name              = "Audit"
-  email             = "wakabaseisei+audit@gmail.com"
-  parent_id         = aws_organizations_organizational_unit.security.id
-  close_on_deletion = true
-}
