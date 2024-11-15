@@ -77,7 +77,7 @@ jobs:
         working-directory: ${{ matrix.workdir }}
   post-terraform:
     name: All jobs passed
-    if: success()
+    needs: [determine-workdir, plan-and-apply]
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
