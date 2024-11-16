@@ -23,10 +23,9 @@ resource "aws_iam_role" "github_actions_plan" {
   })
 }
 
-# TODO: あとでポリシーを調整する
 resource "aws_iam_role_policy_attachment" "github_actions_plan" {
   role       = aws_iam_role.github_actions_plan.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 resource "aws_iam_role" "github_actions_apply" {
