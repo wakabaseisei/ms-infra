@@ -148,7 +148,7 @@ resource "aws_controltower_landing_zone" "main" {
         }
       },
       "centralizedLogging" : {
-        "accountId" : "${aws_organizations_account.log_archive.account_id}",
+        "accountId" : "${aws_organizations_account.log_archive.id}",
         "configurations" : {
           "loggingBucket" : {
             "retentionDays" : 2
@@ -161,7 +161,7 @@ resource "aws_controltower_landing_zone" "main" {
         "enabled" : true
       },
       "securityRoles" : {
-        "accountId" : "${aws_organizations_account.audit.account_id}"
+        "accountId" : "${aws_organizations_account.audit.id}"
       },
       "accessManagement" : {
         "enabled" : false
