@@ -1,2 +1,4 @@
 platform:
   AWS_ACCOUNT_ID: AWS_ACCOUNT_ID_PLATFORM
+services/api-front/dev:
+  AWS_ACCOUNT_ID: AWS_ACCOUNT_ID_DEV
