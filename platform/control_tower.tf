@@ -133,40 +133,41 @@ resource "aws_iam_role_policy_attachment" "controltower_stackset" {
   policy_arn = aws_iam_policy.controltower_stackset.arn
 }
 
-resource "aws_controltower_landing_zone" "main" {
-  manifest_json = jsonencode(
-    {
-      "governedRegions" : [
-        "${data.aws_region.current.name}",
-      ],
-      "organizationStructure" : {
-        "security" : {
-          "name" : "Security"
-        },
-        "sandbox" : {
-          "name" : "Sandbox"
-        }
-      },
-      "centralizedLogging" : {
-        "accountId" : "${aws_organizations_account.log_archive.id}",
-        "configurations" : {
-          "loggingBucket" : {
-            "retentionDays" : 2
-          },
-          "accessLoggingBucket" : {
-            "retentionDays" : 2
-          }
-          "kmsKeyArn": "${aws_kms_key.control_tower_kms_key.arn}"
-        },
-        "enabled" : true
-      },
-      "securityRoles" : {
-        "accountId" : "${aws_organizations_account.audit.id}"
-      },
-      "accessManagement" : {
-        "enabled" : false
-      }
-    }
-  )
-  version = "3.3"
-}
+# TODO: To optimize costs, we will apply this change at a later, carefully chosen time.
+# resource "aws_controltower_landing_zone" "main" {
+#   manifest_json = jsonencode(
+#     {
+#       "governedRegions" : [
+#         "${data.aws_region.current.name}",
+#       ],
+#       "organizationStructure" : {
+#         "security" : {
+#           "name" : "Security"
+#         },
+#         "sandbox" : {
+#           "name" : "Sandbox"
+#         }
+#       },
+#       "centralizedLogging" : {
+#         "accountId" : "${aws_organizations_account.log_archive.id}",
+#         "configurations" : {
+#           "loggingBucket" : {
+#             "retentionDays" : 2
+#           },
+#           "accessLoggingBucket" : {
+#             "retentionDays" : 2
+#           }
+#           "kmsKeyArn": "${aws_kms_key.control_tower_kms_key.arn}"
+#         },
+#         "enabled" : true
+#       },
+#       "securityRoles" : {
+#         "accountId" : "${aws_organizations_account.audit.id}"
+#       },
+#       "accessManagement" : {
+#         "enabled" : false
+#       }
+#     }
+#   )
+#   version = "3.3"
+# }
