@@ -7,7 +7,7 @@ resource "aws_iam_role" "github_actions_plan" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+          "Federated" : "arn:aws:iam::${var.account_id}:oidc-provider/token.actions.githubusercontent.com"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
@@ -37,7 +37,7 @@ resource "aws_iam_role" "github_actions_apply" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+          "Federated" : "arn:aws:iam::${var.account_id}:oidc-provider/token.actions.githubusercontent.com"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {

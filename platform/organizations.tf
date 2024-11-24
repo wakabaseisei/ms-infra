@@ -1,7 +1,3 @@
-data "aws_organizations_organization" "main" {}
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 resource "aws_organizations_organizational_unit" "foundational" {
   name      = "Foundational"
   parent_id = data.aws_organizations_organization.main.roots[0].id
