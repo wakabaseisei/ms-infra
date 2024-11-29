@@ -1,4 +1,6 @@
 platform:
   - 'platform/*'
+services/_common/dev:
+  - 'services/_common/dev/*'
 services/api-front/dev:
   - 'services/api-front/dev/*'
