@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "ms-infra-services-${local.service_name_env}"
+    bucket = "ms-infra-services-api-front-dev"
     key    = "backend/terraform.tfstate"
     region = "ap-northeast-1"
   }
