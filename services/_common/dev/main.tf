@@ -29,3 +29,15 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = "1"
   }
 }
+
+module "eks" {
+  source          = "terraform-aws-modules/eks/aws"
+  cluster_version = "1.31"
+  cluster_name    = "${local.env}-eks"
+  vpc_id          = module.vpc.vpc_id
+  enable_irsa     = true
+}
+
+module "cluster" {
+  source = "../../../modules/cluster"
+}
