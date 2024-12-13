@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "repo" {
-  name                 = "${var.container_repository_name}"
+  name                 = var.namespace
   image_tag_mutability = "IMMUTABLE"
 
   image_scanning_configuration {
