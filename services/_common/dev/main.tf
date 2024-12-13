@@ -37,6 +37,7 @@ module "eks" {
   cluster_name    = "${local.env}-eks"
   vpc_id          = module.vpc.vpc_id
   enable_irsa     = true
+  subnet_ids = module.vpc.private_subnets
 }
 
 module "cluster" {
