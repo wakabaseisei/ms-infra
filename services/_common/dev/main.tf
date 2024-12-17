@@ -43,6 +43,7 @@ module "eks" {
 
   cluster_endpoint_public_access = true
   cluster_endpoint_private_access = true
+  authentication_mode = "API"
 
   enable_cluster_creator_admin_permissions = true
 
@@ -50,6 +51,8 @@ module "eks" {
     enabled    = true
     node_pools = ["general-purpose"]
   }
+
+  cloudwatch_log_group_retention_in_days = 3
 }
 
 module "cluster" {
