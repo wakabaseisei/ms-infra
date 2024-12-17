@@ -47,6 +47,8 @@ module "eks" {
 
   enable_cluster_creator_admin_permissions = true
 
+  # EKS Auto Mode will create and delete EC2 Managed Instances
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#compute_config
   cluster_compute_config = {
     enabled    = true
     node_pools = ["general-purpose"]
