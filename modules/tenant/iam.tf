@@ -1,5 +1,5 @@
 resource "aws_iam_role" "github_actions_docker_image_push" {
-  name = "github_actions_docker_image_push"
+  name = "github_actions_docker_image_push-${var.github_repository_name}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
