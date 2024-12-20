@@ -30,13 +30,32 @@ module "vpc" {
   }
 }
 
-# module "eks" {
-#   source          = "terraform-aws-modules/eks/aws"
-#   cluster_version = "1.31"
-#   cluster_name    = "${local.env}-eks"
-#   vpc_id          = module.vpc.vpc_id
-#   enable_irsa     = true
-# }
+module "eks" {
+  source          = "terraform-aws-modules/eks/aws"
+
+  version = "~> 20.31"
+  cluster_version = "1.31"
+
+  cluster_name    = "${local.env}-eks"
+
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  cluster_endpoint_public_access = true
+  cluster_endpoint_private_access = true
+  authentication_mode = "API"
+
+  enable_cluster_creator_admin_permissions = true
+
+  # EKS Auto Mode will create and delete EC2 Managed Instances
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#compute_config
+  cluster_compute_config = {
+    enabled    = true
+    node_pools = ["general-purpose"]
+  }
+
+  cloudwatch_log_group_retention_in_days = 3
+}
 
 module "cluster" {
   source = "../../../modules/cluster"
