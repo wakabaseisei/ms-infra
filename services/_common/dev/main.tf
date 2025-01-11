@@ -62,7 +62,7 @@ module "eks" {
       principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/ap-northeast-1/AWSReservedSSO_AdministratorAccess_81e4d4a3d70e0c36"
 
       policy_associations = {
-        example = {
+        clusteradmin = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           access_scope = {
             type       = "cluster"
