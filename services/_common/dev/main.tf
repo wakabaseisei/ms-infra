@@ -82,7 +82,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids        = module.vpc.private_subnets
-  security_group_ids = [module.vpc.default_security_group_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
 
   tags = {
     Name = "ECR-API-Endpoint"
@@ -94,7 +94,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids        = module.vpc.private_subnets
-  security_group_ids = [module.vpc.default_security_group_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
 
   tags = {
     Name = "ECR-DKR-Endpoint"
@@ -109,5 +109,29 @@ resource "aws_vpc_endpoint" "s3" {
 
   tags = {
     Name = "S3-Gateway-Endpoint"
+  }
+}
+
+resource "aws_security_group" "vpc_endpoints" {
+  name        = "${local.env}-vpc-endpoints-sg"
+  description = "Security group for VPC endpoints"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = module.vpc.private_subnets_cidr_blocks
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${local.env}-vpc-endpoints-sg"
   }
 }
