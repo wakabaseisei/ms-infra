@@ -18,7 +18,7 @@ module "vpc" {
 
   # NAT Gateway is disabled (default value).
   # Explicitly set to false to indicate it is not in use.
-  enable_nat_gateway = true
+  enable_nat_gateway = false
 
   # For use with AWS Load Balancer Controller
   public_subnet_tags = {
