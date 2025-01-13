@@ -73,10 +73,6 @@ module "eks" {
   }
 }
 
-module "cluster" {
-  source = "../../../modules/cluster"
-}
-
 resource "aws_vpc_endpoint" "ecr_api" {
   vpc_id            = module.vpc.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
