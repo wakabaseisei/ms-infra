@@ -108,7 +108,6 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = module.vpc.private_route_table_ids
-  private_dns_enabled = true
 
   tags = {
     Name = "S3-Gateway-Endpoint"
