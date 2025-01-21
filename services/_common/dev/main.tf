@@ -58,7 +58,6 @@ module "eks" {
   cloudwatch_log_group_retention_in_days = 3
 
   access_entries = {
-    # One access entry with a policy associated
     local = {
       principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/ap-northeast-1/AWSReservedSSO_AdministratorAccess_81e4d4a3d70e0c36"
 
