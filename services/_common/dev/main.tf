@@ -145,9 +145,9 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 }
 
-module "cluster" {
-  source = "../../../modules/cluster"
-  depends_on = [
-    module.eks
-  ]
-}
+# module "cluster" {
+#   source = "../../../modules/cluster"
+#   depends_on = [
+#     module.eks
+#   ]
+# }
