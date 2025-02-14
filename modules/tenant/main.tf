@@ -68,6 +68,7 @@ resource "aws_iam_role" "irsa" {
 // RDS(Optional)
 // IAM Database Authentication
 data "aws_iam_policy_document" "rds_iam_auth" {
+  count = local.rds == null ? 1 : 0
   statement {
     effect = "Allow"
     actions = ["rds-db:connect"]
@@ -78,11 +79,13 @@ data "aws_iam_policy_document" "rds_iam_auth" {
 }
 
 resource "aws_iam_policy" "rds_iam_auth" {
-  name   = "rds-iam-auth-${var.rds.cluster_id}"
+  count = local.rds == null ? 1 : 0
+  name   = "rds-iam-auth-${local.rds.cluster_id}"
   policy = data.aws_iam_policy_document.rds_iam_auth.json
 }
 
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
+  count = local.rds == null ? 1 : 0
   role       = aws_iam_role.irsa.name
   policy_arn = aws_iam_policy.rds_iam_auth.arn
 }

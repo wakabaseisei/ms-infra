@@ -1,5 +1,5 @@
 variable "namespace" {
-    type = string
+  type = string
 }
 
 variable "account_id" {
@@ -15,7 +15,7 @@ variable "eks" {
     service_account_name = optional(string, "*")
     oidc_provider = string
   })
-  default = null
+  description = "for OIDC Provider Role IRSA"
 }
 
 variable "rds" {
