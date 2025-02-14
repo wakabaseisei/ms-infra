@@ -44,6 +44,7 @@ resource "aws_ecr_repository" "repo" {
 // IRSA
 // https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest#output_oidc_provider_arn
 resource "aws_iam_role" "irsa" {
+  count = local.eks == null ? 0 : 1
   name = "irsa"
 
   assume_role_policy = jsonencode({
@@ -68,7 +69,7 @@ resource "aws_iam_role" "irsa" {
 // RDS(Optional)
 // IAM Database Authentication
 data "aws_iam_policy_document" "rds_iam_auth" {
-  count = local.rds == null ? 1 : 0
+  count = local.rds == null ? 0 : 1
   statement {
     effect = "Allow"
     actions = ["rds-db:connect"]
@@ -79,13 +80,13 @@ data "aws_iam_policy_document" "rds_iam_auth" {
 }
 
 resource "aws_iam_policy" "rds_iam_auth" {
-  count = local.rds == null ? 1 : 0
+  count = local.rds == null ? 0 : 1
   name   = "rds-iam-auth-${local.rds.cluster_id}"
   policy = data.aws_iam_policy_document.rds_iam_auth.json
 }
 
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
-  count = local.rds == null ? 1 : 0
+  count = local.rds == null ? 0 : 1
   role       = aws_iam_role.irsa.name
   policy_arn = aws_iam_policy.rds_iam_auth.arn
 }

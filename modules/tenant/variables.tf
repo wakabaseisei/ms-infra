@@ -16,6 +16,7 @@ variable "eks" {
     oidc_provider = string
   })
   description = "for OIDC Provider Role IRSA"
+  default = null
 }
 
 variable "rds" {
