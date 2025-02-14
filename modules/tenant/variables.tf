@@ -9,3 +9,19 @@ variable "account_id" {
 variable "github_repository_name" {
   type = string
 }
+
+variable "eks" {
+  type = object({
+    service_account_name = optional(string, "*")
+    oidc_provider = string
+  })
+  default = null
+}
+
+variable "rds" {
+  type = object({
+    cluster_id = string
+    db_user_name = string
+  })
+  default = null
+}
