@@ -82,12 +82,12 @@ data "aws_iam_policy_document" "rds_iam_auth" {
 resource "aws_iam_policy" "rds_iam_auth" {
   count = local.rds == null ? 0 : 1
   name   = "rds-iam-auth-${local.rds.cluster_id}"
-  policy = data.aws_iam_policy_document.rds_iam_auth[count.index].json
+  policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
   count = local.rds == null ? 0 : 1
-  role       = aws_iam_role.irsa.name
-  policy_arn = aws_iam_policy.rds_iam_auth.arn
+  role       = aws_iam_role.irsa[0].name
+  policy_arn = aws_iam_policy.rds_iam_auth[0].arn
 }
 
