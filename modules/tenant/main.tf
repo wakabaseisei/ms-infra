@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 // use for GitHub Actions docker image push workflow.
 resource "aws_iam_role" "github_actions_docker_image_push" {
   name = "github_actions_docker_image_push-${var.github_repository_name}"
@@ -55,7 +57,7 @@ resource "aws_iam_role" "irsa" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.eks.idc_provider}:sub" = "system:serviceaccount:${local.namespace}:${local.eks.service_account_name}"
+            "${local.eks.oidc_provider}:sub" = "system:serviceaccount:${local.namespace}:${local.eks.service_account_name}"
           }
         }
       }
