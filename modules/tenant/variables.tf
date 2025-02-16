@@ -1,5 +1,5 @@
 variable "namespace" {
-    type = string
+  type = string
 }
 
 variable "account_id" {
@@ -8,4 +8,21 @@ variable "account_id" {
 
 variable "github_repository_name" {
   type = string
+}
+
+variable "eks" {
+  type = object({
+    service_account_name = optional(string, "*")
+    oidc_provider = string
+  })
+  description = "for OIDC Provider Role IRSA"
+  default = null
+}
+
+variable "rds" {
+  type = object({
+    cluster_id = string
+    db_user_name = string
+  })
+  default = null
 }
