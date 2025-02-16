@@ -40,7 +40,7 @@ variable "engine_mode" {
   description = "Database engine mode."
   default = "provisioned"
   validation {
-    condition     = contains(["global", "parallelquery", "provisioned", "serverless"], var.engine)
+    condition     = contains(["global", "parallelquery", "provisioned", "serverless"], var.engine_mode)
     error_message = "Allowed values for engine_mode are \"global\", \"parallelquery\", \"provisioned\", or \"serverless\"."
   }
 }
@@ -74,10 +74,7 @@ variable "serverlessv2_scaling_configuration" {
     min_capacity             = number
     seconds_until_auto_pause = number
   })
-  validation {
-    condition = var.engine_mode == "provisioned"
-    error_message = "serverlessv2_scaling_configuration can only be set when engine_mode is \"provisioned\"."
-  }
+  
   default = {
     max_capacity = 1.0
     min_capacity = 0.0
