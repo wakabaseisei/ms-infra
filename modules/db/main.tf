@@ -14,7 +14,7 @@ resource "aws_rds_cluster" "cluster" {
   apply_immediately = true
 
   dynamic "serverlessv2_scaling_configuration" {
-    for_each = local.rds.serverlessv2_scaling_configuration
+    for_each = local.rds.serverlessv2_scaling_configuration == null ? [] : [true]
     content {
       max_capacity             = local.rds.serverlessv2_scaling_configuration.max_capacity
       min_capacity             = local.rds.serverlessv2_scaling_configuration.min_capacity
