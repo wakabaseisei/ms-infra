@@ -24,7 +24,7 @@ module "aurora" {
   cluster_vpc_id = data.terraform_remote_state.common.outputs.vpc_id
   cluster_instances_subnet_ids = data.terraform_remote_state.common.outputs.database_subnets
   cluster_ingress_allowed_security_groups = [ data.terraform_remote_state.common.outputs.eks_node_security_group_id ]
-  database_name = local.service_name
+  database_name = local.service_name_letter
   // TODO: もっといい感じに指定
   reader_instance_classes = [ "db.serverless", "db.serverless" ]
 }
