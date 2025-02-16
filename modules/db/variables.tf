@@ -31,7 +31,7 @@ variable "engine" {
 variable "engine_version" {
   type = string
   description = "Database engine version"
-  default = "8.0.39.mysql_aurora.3.08.0"
+  default = "8.0.mysql_aurora.3.08.0"
 }
 
 
