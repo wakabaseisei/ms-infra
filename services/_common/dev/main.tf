@@ -18,7 +18,7 @@ module "vpc" {
   database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
 
   // NOTE: Disable to reduce cost when eks cluster is not used.
-  enable_nat_gateway = true
+  # enable_nat_gateway = true
 
   # For use with AWS Load Balancer Controller
   public_subnet_tags = {
@@ -147,9 +147,9 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 }
 
-module "cicd" {
-  source = "../../../modules/cicd"
-  depends_on = [
-    module.eks
-  ]
-}
+# module "cicd" {
+#   source = "../../../modules/cicd"
+#   depends_on = [
+#     module.eks
+#   ]
+# }
