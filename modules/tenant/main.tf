@@ -95,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
 resource "aws_lambda_function" "migration_lambda" {
   count = local.rds == null ? 0 : 1
   function_name = "golang-migrate-lambda"
-  role          = aws_iam_role.lambda_migration_role.arn
+  role          = aws_iam_role.lambda_migration_role[0].arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.repo.repository_url}:latest"
   timeout       = 900
