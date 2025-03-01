@@ -53,8 +53,20 @@ resource "aws_security_group" "rds_cluster_security_group" {
     protocol  = "tcp"
     from_port = 3306
     to_port   = 3306
-    security_groups = local.rds.cluster_ingress_allowed_security_groups
+    security_groups = concat([aws_security_group.lambda_migration_security_group.id], local.rds.cluster_ingress_allowed_security_groups)
   }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "lambda_migration_security_group" {
+  vpc_id = local.rds.cluster_vpc_id
+  name   = "lambda-migration-security-group"
 
   egress {
     protocol    = "-1"

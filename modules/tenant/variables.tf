@@ -22,7 +22,12 @@ variable "eks" {
 variable "rds" {
   type = object({
     cluster_id = string
+    cluster_endpoint = string
+    db_port = string
     db_user_name = string
+    db_name = string
+    database_subnets = set(string)
+    lambda_migration_security_group_id = string
   })
   default = null
 }

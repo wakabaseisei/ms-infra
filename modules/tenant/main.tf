@@ -91,3 +91,56 @@ resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
   policy_arn = aws_iam_policy.rds_iam_auth[0].arn
 }
 
+// DB Migration
+resource "aws_lambda_function" "migration_lambda" {
+  count = local.rds == null ? 0 : 1
+  function_name = "golang-migrate-lambda"
+  role          = aws_iam_role.lambda_migration_role[0].arn
+  package_type  = "Image"
+  image_uri     = "${aws_ecr_repository.repo.repository_url}:latest"
+  timeout       = 900
+
+  vpc_config {
+    subnet_ids         = local.rds.database_subnets
+    security_group_ids = [local.rds.lambda_migration_security_group_id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST = local.rds.cluster_endpoint
+      DB_PORT = local.rds.db_port
+      DB_USER = local.rds.db_user_name
+      DB_NAME = local.rds.db_name
+      AWS_REGION = data.aws_region.current.name
+    }
+  }
+
+  image_config {
+    entry_point = ["/bin/migrate-cli", "up"]
+  }
+}
+
+resource "aws_iam_role" "lambda_migration_role" {
+  count = local.rds == null ? 0 : 1
+  name = "lambda-migration-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach_to_lambda" {
+  count = local.rds == null ? 0 : 1
+  role       = aws_iam_role.lambda_migration_role[0].name
+  policy_arn = aws_iam_policy.rds_iam_auth[0].arn
+}
+

@@ -13,9 +13,14 @@ module "tenant" {
     #   oidc_provider = data.terraform_remote_state.common.outputs.eks_oidc_provider
     # }
     // NOTE: Disabled to reduce costs. Uncomment out only when used.
-    # rds = {
-    #   cluster_id = module.aurora.db_cluster_resource_id
-    #   db_user_name = local.service_name
+    #  rds = {
+    #     cluster_id = module.aurora.db_cluster_resource_id
+    #     cluster_endpoint = module.aurora.db_cluster_endpoint
+    #     db_port = "3306"
+    #     db_user_name = local.service_name
+    #     db_name = local.service_name_letter
+    #     database_subnets = data.terraform_remote_state.common.outputs.database_subnets
+    #     lambda_migration_security_group_id = module.aurora.lambda_migration_security_group_id
     # }
 }
 
@@ -27,6 +32,6 @@ module "tenant" {
 #   cluster_instances_subnet_ids = data.terraform_remote_state.common.outputs.database_subnets
 #   cluster_ingress_allowed_security_groups = [ data.terraform_remote_state.common.outputs.eks_node_security_group_id ]
 #   database_name = local.service_name_letter
-#   // TODO: もっといい感じに指定
+#   // TODO: もっといい感じに指定したい
 #   reader_instance_classes = [ "db.serverless", "db.serverless" ]
 # }
