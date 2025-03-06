@@ -45,7 +45,7 @@ resource "aws_ecr_repository" "repo" {
 // https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest#output_oidc_provider_arn
 resource "aws_iam_role" "irsa" {
   count = local.eks == null ? 0 : 1
-  name = "irsa"
+  name = "irsa-${local.namespace}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -94,9 +94,10 @@ resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
 // DB Migration
 resource "aws_lambda_function" "migration_lambda" {
   count = local.rds == null ? 0 : 1
-  function_name = "golang-migrate-lambda"
+  function_name = "golang-migrate-lambda-${local.namespace}"
   role          = aws_iam_role.lambda_migration_role[0].arn
   package_type  = "Image"
+  // https://qiita.com/Kyohei-takiyama/items/86e71e1f4f989bbfc665
   image_uri     = "${aws_ecr_repository.repo.repository_url}:latest"
   timeout       = 900
 
@@ -122,7 +123,7 @@ resource "aws_lambda_function" "migration_lambda" {
 
 resource "aws_iam_role" "lambda_migration_role" {
   count = local.rds == null ? 0 : 1
-  name = "lambda-migration-role"
+  name = "lambda-migration-role-${local.namespace}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
