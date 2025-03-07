@@ -7,3 +7,7 @@ data "terraform_remote_state" "common" {
     region = "ap-northeast-1"
   }
 }
+
+data "aws_secretsmanager_secret_version" "rds_master_password" {
+  secret_id = module.db.rds_master_password_secret_arn
+}
