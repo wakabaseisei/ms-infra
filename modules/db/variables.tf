@@ -1,3 +1,7 @@
+variable "account_id" {
+  type = string
+}
+
 variable "cluster_identifier" {
   type = string
   description = "RDS cluster ID"
@@ -80,4 +84,28 @@ variable "serverlessv2_scaling_configuration" {
     min_capacity = 0.0
     seconds_until_auto_pause = 600
   }
+}
+
+variable "database_username" {
+  type = string
+  description = "To use for Application or Migration"
+}
+
+variable "database_access_client" {
+  type = object({
+    role = string
+    security_group_id = string
+
+  })
+  default = null
+}
+
+variable "migration_lambda" {
+  type = object({
+    image_url = string
+    image_tag = string
+    entry_point = set(string)
+  })
+
+  default = null
 }
