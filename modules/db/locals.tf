@@ -2,7 +2,6 @@ locals {
   cluster_identifier = var.cluster_identifier
   cluster_vpc_id = var.cluster_vpc_id
   cluster_instances_subnet_ids = var.cluster_instances_subnet_ids
-  cluster_ingress_allowed_security_groups = var.cluster_ingress_allowed_security_groups
   engine = var.engine
   engine_mode = var.engine_mode
   engine_version = var.engine_version

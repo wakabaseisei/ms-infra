@@ -17,11 +17,6 @@ variable "cluster_instances_subnet_ids" {
   description = "List of VPC subnet IDs where the RDS instances can be deployed."
 }
 
-variable "cluster_ingress_allowed_security_groups" {
-  type        = list(string)
-  description = "List of Security Group IDs allowed to access the RDS cluster."
-}
-
 variable "engine" {
   type = string
   description = "Name of the database engine"
