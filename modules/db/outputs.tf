@@ -1,11 +1,11 @@
-output "db_cluster_resource_id" {
-    value = aws_rds_cluster.cluster.id
+output "rds_master_password_secret_arn" {
+  value = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
 }
 
 output "db_cluster_endpoint" {
   value = aws_rds_cluster.cluster.endpoint
 }
 
-output "lambda_migration_security_group_id" {
-  value = aws_security_group.lambda_migration_security_group.id
+output "rds_master_username" {
+  value = aws_rds_cluster.cluster.master_username
 }
