@@ -9,5 +9,5 @@ data "terraform_remote_state" "common" {
 }
 
 data "aws_secretsmanager_secret_version" "rds_master_password" {
-  secret_id = module.db.rds_master_password_secret_arn
+  secret_id = module.aurora.rds_master_password_secret_arn
 }
