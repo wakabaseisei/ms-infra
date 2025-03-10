@@ -100,10 +100,18 @@ resource "null_resource" "create_mysql_iam_user" {
       mysql --host=${aws_rds_cluster.cluster.endpoint} \
             --port=3306 \
             --user=${aws_rds_cluster.cluster.master_username} \
-            --password=${aws_rds_cluster.cluster.master_password} \
+            --password=${jsondecode(data.aws_secretsmanager_secret_version.master_password.secret_string)["password"]} \
             -e "CREATE USER '${local.database_username}'@'%' IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';"
     EOT
   }
+}
+
+data "aws_secretsmanager_secret" "master_password" {
+  arn = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
+}
+
+data "aws_secretsmanager_secret_version" "master_password" {
+  secret_id = data.aws_secretsmanager_secret.master_password.id
 }
 
 // DB Migration(Optional)
@@ -127,7 +135,6 @@ resource "aws_lambda_function" "migration_lambda" {
       DB_PORT = 3306
       DB_USER = local.database_username
       DB_NAME = local.database_name
-      AWS_REGION = data.aws_region.current.name
     }
   }
 
