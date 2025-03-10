@@ -93,6 +93,19 @@ resource "aws_vpc_security_group_ingress_rule" "allow_database_access_client_sec
   referenced_security_group_id = local.database_access_client.security_group_id
 }
 
+// DB User
+resource "null_resource" "create_mysql_iam_user" {
+  provisioner "local-exec" {
+    command = <<EOT
+      mysql --host=${aws_rds_cluster.cluster.endpoint} \
+            --port=3306 \
+            --user=${aws_rds_cluster.cluster.master_username} \
+            --password=${aws_rds_cluster.cluster.master_password} \
+            -e "CREATE USER '${local.database_username}'@'%' IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';"
+    EOT
+  }
+}
+
 // DB Migration(Optional)
 resource "aws_lambda_function" "migration_lambda" {
   count = local.create_migration ? 1 : 0
