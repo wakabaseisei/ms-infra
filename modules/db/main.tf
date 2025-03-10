@@ -1,10 +1,12 @@
+data "aws_region" "current" {}
+
 resource "aws_rds_cluster" "cluster" {
-  cluster_identifier = local.rds.cluster_identifier
-  engine             = local.rds.engine
-  engine_mode        = local.rds.engine_mode
-  engine_version     = local.rds.engine_version
-  database_name      = local.rds.database_name
-  master_username    = local.rds.master_username
+  cluster_identifier = local.cluster_identifier
+  engine             = local.engine
+  engine_mode        = local.engine_mode
+  engine_version     = local.engine_version
+  database_name      = local.database_name
+  master_username    = local.master_username
   db_subnet_group_name = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds_cluster_security_group.id]
   iam_database_authentication_enabled = true
@@ -14,24 +16,25 @@ resource "aws_rds_cluster" "cluster" {
   apply_immediately = true
 
   dynamic "serverlessv2_scaling_configuration" {
-    for_each = local.rds.serverlessv2_scaling_configuration == null ? [] : [true]
+    for_each = local.serverlessv2_scaling_configuration == null ? [] : [true]
     content {
-      max_capacity             = local.rds.serverlessv2_scaling_configuration.max_capacity
-      min_capacity             = local.rds.serverlessv2_scaling_configuration.min_capacity
-      seconds_until_auto_pause = local.rds.serverlessv2_scaling_configuration.seconds_until_auto_pause
+      max_capacity             = local.serverlessv2_scaling_configuration.max_capacity
+      min_capacity             = local.serverlessv2_scaling_configuration.min_capacity
+      seconds_until_auto_pause = local.serverlessv2_scaling_configuration.seconds_until_auto_pause
     }
   }
 }
 
 resource "aws_rds_cluster_instance" "writer" {
   cluster_identifier = aws_rds_cluster.cluster.id
-  instance_class     = local.rds.writer_instance_class_type
+  instance_class     = local.writer_instance_class_type
   engine             = aws_rds_cluster.cluster.engine
   engine_version     = aws_rds_cluster.cluster.engine_version
+  db_subnet_group_name = aws_db_subnet_group.rds.name
 }
 
 resource "aws_rds_cluster_instance" "reader" {
-  for_each = { for idx, class in local.rds.reader_instance_classes : idx => class }
+  for_each = { for idx, class in local.reader_instance_classes : idx => class }
 
   cluster_identifier = aws_rds_cluster.cluster.id
   instance_class     = each.value
@@ -42,36 +45,140 @@ resource "aws_rds_cluster_instance" "reader" {
 
 resource "aws_db_subnet_group" "rds" {
   name = "rds"
-  subnet_ids = local.rds.cluster_instances_subnet_ids
+  subnet_ids = local.cluster_instances_subnet_ids
 }
 
 resource "aws_security_group" "rds_cluster_security_group" {
-  vpc_id = local.rds.cluster_vpc_id
+  vpc_id = local.cluster_vpc_id
   name   = "rds-security-group"
+}
 
-  ingress {
-    protocol  = "tcp"
-    from_port = 3306
-    to_port   = 3306
-    security_groups = concat([aws_security_group.lambda_migration_security_group.id], local.rds.cluster_ingress_allowed_security_groups)
-  }
+resource "aws_vpc_security_group_egress_rule" "allow_all" {
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.rds_cluster_security_group.id
+}
 
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+// IAM Database Authentication(Optional)
+data "aws_iam_policy_document" "rds_iam_auth" {
+  count = local.create_iam_database_auth ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = ["rds-db:connect"]
+    resources = [
+      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser/${local.cluster_identifier}/${local.database_username}"
+    ]
   }
 }
 
-resource "aws_security_group" "lambda_migration_security_group" {
-  vpc_id = local.rds.cluster_vpc_id
-  name   = "lambda-migration-security-group"
+resource "aws_iam_policy" "rds_iam_auth" {
+  count = local.create_iam_database_auth ? 1 : 0
+  name   = "rds-iam-auth-${local.cluster_identifier}"
+  policy = data.aws_iam_policy_document.rds_iam_auth[0].json
+}
 
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+// DB Access(Optional)
+resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
+  count = local.create_database_access ? 1 : 0
+  role       = local.database_access_client.role
+  policy_arn = aws_iam_policy.rds_iam_auth[0].arn
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_database_access_client_security_group" {
+  count = local.create_database_access ? 1 : 0
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  security_group_id = aws_security_group.rds_cluster_security_group.id
+  referenced_security_group_id = local.database_access_client.security_group_id
+}
+
+// DB User
+resource "null_resource" "create_mysql_iam_user" {
+  provisioner "local-exec" {
+    command = <<EOT
+      mysql --host=${aws_rds_cluster.cluster.endpoint} \
+            --port=3306 \
+            --user=${aws_rds_cluster.cluster.master_username} \
+            --password=${aws_rds_cluster.cluster.master_password} \
+            -e "CREATE USER '${local.database_username}'@'%' IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';"
+    EOT
   }
+}
+
+// DB Migration(Optional)
+resource "aws_lambda_function" "migration_lambda" {
+  count = local.create_migration ? 1 : 0
+  function_name = "migrate-lambda-${local.cluster_identifier}"
+  role          = aws_iam_role.lambda_migration_role[0].arn
+  package_type  = "Image"
+  // https://qiita.com/Kyohei-takiyama/items/86e71e1f4f989bbfc665
+  image_uri     = "${local.migration_lambda.image_url}:${local.migration_lambda.image_tag}"
+  timeout       = 900
+
+  vpc_config {
+    subnet_ids         = local.cluster_instances_subnet_ids
+    security_group_ids = [aws_security_group.lambda_migration_security_group[0].id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST = aws_rds_cluster.cluster.endpoint
+      DB_PORT = 3306
+      DB_USER = local.database_username
+      DB_NAME = local.database_name
+      AWS_REGION = data.aws_region.current.name
+    }
+  }
+
+  image_config {
+    entry_point = local.migration_lambda.entry_point
+    # entry_point = ["/bin/migrate-cli", "up"]
+  }
+}
+
+resource "aws_iam_role" "lambda_migration_role" {
+  count = local.create_migration ? 1 : 0
+  name = "lambda-migration-role-${local.cluster_identifier}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach_to_lambda" {
+  count = local.create_migration ? 1 : 0
+  role       = aws_iam_role.lambda_migration_role[0].name
+  policy_arn = aws_iam_policy.rds_iam_auth[0].arn
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_lambda_migration_security_group" {
+  count = local.create_migration ? 1 : 0
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  security_group_id = aws_security_group.rds_cluster_security_group.id
+  referenced_security_group_id = aws_security_group.lambda_migration_security_group[0].id
+}
+
+resource "aws_security_group" "lambda_migration_security_group" {
+  count = local.create_migration ? 1 : 0
+  vpc_id = local.cluster_vpc_id
+  name   = "lambda-migration-security-group-${local.cluster_identifier}"
+}
+
+resource "aws_vpc_security_group_egress_rule" "lambda_migration_security_group_rule" {
+  count = local.create_migration ? 1 : 0
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.lambda_migration_security_group[0].id
 }
