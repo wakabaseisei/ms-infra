@@ -27,8 +27,8 @@ module "aurora" {
   migration_lambda = {
     # CIで置き換えるため、仮のURLとして設定
     image_url = "dummy"
-    # latest運用はしないが、CIで置き換えるため、仮のタグとして設定
-    image_tag = "latest"
+    # CIで置き換えるため、仮のタグとして設定
+    image_tag = "dummy"
     entry_point = ["/bin/migrate-cli", "up"]
   }
 }
