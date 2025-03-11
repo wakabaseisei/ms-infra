@@ -6,6 +6,12 @@ module "github" {
     account_id = data.aws_caller_identity.current.account_id
 }
 
+module "db_user_generator" {
+  source = "../../../modules/docker-image-push"
+  account_id = data.aws_caller_identity.current.account_id
+  github_repository_name = "ms-db-user-generator"
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 

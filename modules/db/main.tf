@@ -77,6 +77,9 @@ resource "aws_iam_policy" "rds_iam_auth" {
   policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
+// Create DB User(Optional)
+// TODO: Lambda
+
 // DB Access(Optional)
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
   count = local.create_database_access ? 1 : 0
@@ -91,27 +94,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_database_access_client_sec
   ip_protocol       = "tcp"
   security_group_id = aws_security_group.rds_cluster_security_group.id
   referenced_security_group_id = local.database_access_client.security_group_id
-}
-
-// DB User
-resource "null_resource" "create_mysql_iam_user" {
-  provisioner "local-exec" {
-    command = <<EOT
-      mysql --host=${aws_rds_cluster.cluster.endpoint} \
-            --port=3306 \
-            --user=${aws_rds_cluster.cluster.master_username} \
-            --password=${jsondecode(data.aws_secretsmanager_secret_version.master_password.secret_string)["password"]} \
-            -e "CREATE USER '${local.database_username}'@'%' IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';"
-    EOT
-  }
-}
-
-data "aws_secretsmanager_secret" "master_password" {
-  arn = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
-}
-
-data "aws_secretsmanager_secret_version" "master_password" {
-  secret_id = data.aws_secretsmanager_secret.master_password.id
 }
 
 // DB Migration(Optional)

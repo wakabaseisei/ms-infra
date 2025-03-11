@@ -29,6 +29,6 @@ module "tenant" {
 #     image_url = "dummy"
 #     # CIで置き換えるため、仮のタグとして設定
 #     image_tag = "dummy"
-#     entry_point = ["/bin/migrate-cli", "up"]
+#     entry_point = ["/bin/migrate-lambda"]
 #   }
 # }
