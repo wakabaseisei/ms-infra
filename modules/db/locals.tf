@@ -23,3 +23,10 @@ locals {
 
   create_iam_database_auth = local.create_database_access || local.create_migration
 }
+
+locals {
+  ms_db_user_generator = {
+    // TODO:
+    image_tag = "TODO"
+  }
+}
