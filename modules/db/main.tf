@@ -90,7 +90,7 @@ resource "terraform_data" "db_user_generator_lambda_invoke" {
       --function-name ${aws_lambda_function.db_user_generator_lambda.function_name} \
       --region ${data.aws_region.current.name} \
       --cli-binary-format raw-in-base64-out \
-      --payload '{ "username": ${local.database_username} }' \
+      --payload '{ "username": "${local.database_username}" }' \
       /dev/stdout
     EOT
   }
