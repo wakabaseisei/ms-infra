@@ -28,7 +28,7 @@ module "aurora" {
     # CIで置き換えるため、仮のURLとして設定
     image_url = "148761642613.dkr.ecr.ap-northeast-1.amazonaws.com/api-front"
     # CIで置き換えるため、仮のタグとして設定
-    image_tag = "dev-20250311-212131-db9d83b"
+    image_tag = "dev-20250320-130902-267446e"
     entry_point = ["/bin/migrate-lambda"]
   }
 }
