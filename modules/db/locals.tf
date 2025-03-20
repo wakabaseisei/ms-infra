@@ -26,6 +26,6 @@ locals {
 
 locals {
   ms_db_user_generator = {
-    image_tag = "dev-20250320-130916-ec4267e"
+    image_tag = "dev-20250320-133848-c78ac9c"
   }
 }
