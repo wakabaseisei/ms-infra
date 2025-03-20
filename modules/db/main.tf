@@ -59,28 +59,10 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   security_group_id = aws_security_group.rds_cluster_security_group.id
 }
 
-// IAM Database Authentication(Optional)
-data "aws_iam_policy_document" "rds_iam_auth" {
-  count = local.create_iam_database_auth ? 1 : 0
-  statement {
-    effect = "Allow"
-    actions = ["rds-db:connect"]
-    resources = [
-      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser/${local.cluster_identifier}/${local.database_username}"
-    ]
-  }
-}
-
-resource "aws_iam_policy" "rds_iam_auth" {
-  count = local.create_iam_database_auth ? 1 : 0
-  name   = "rds-iam-auth-${local.cluster_identifier}"
-  policy = data.aws_iam_policy_document.rds_iam_auth[0].json
-}
-
 // Create DB User
 resource "aws_lambda_function" "db_user_generator_lambda" {
   function_name = "db-user-generator-lambda-${local.cluster_identifier}"
-  role          = aws_iam_role.lambda_migration_role[0].arn
+  role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
   package_type  = "Image"
   image_uri = "${local.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
   timeout       = 900
@@ -114,6 +96,27 @@ resource "terraform_data" "db_user_generator_lambda_invoke" {
   }
 }
 
+resource "aws_iam_role" "db_user_generator_lambda_invoke_role" {
+  name = "user-gen-lambda-role-${local.cluster_identifier}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc_access_execution_role_to_db_gen_lambda_role" {
+  role       = aws_iam_role.db_user_generator_lambda_invoke_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
 
 resource "aws_vpc_security_group_ingress_rule" "allow_lambda_security_group" {
   from_port         = 3306
@@ -132,6 +135,24 @@ resource "aws_vpc_security_group_egress_rule" "lambda_security_group_rule" {
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
   security_group_id = aws_security_group.lambda_security_group.id
+}
+
+// IAM Database Authentication(Optional)
+data "aws_iam_policy_document" "rds_iam_auth" {
+  count = local.create_iam_database_auth ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = ["rds-db:connect"]
+    resources = [
+      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser/${local.cluster_identifier}/${local.database_username}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "rds_iam_auth" {
+  count = local.create_iam_database_auth ? 1 : 0
+  name   = "rds-iam-auth-${local.cluster_identifier}"
+  policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
 // DB Access(Optional)
@@ -202,4 +223,10 @@ resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach_to_lambda" {
   count = local.create_migration ? 1 : 0
   role       = aws_iam_role.lambda_migration_role[0].name
   policy_arn = aws_iam_policy.rds_iam_auth[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc_access_execution_role_to_migration_lambda_role" {
+  count = local.create_migration ? 1 : 0
+  role       = aws_iam_role.lambda_migration_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
