@@ -77,8 +77,62 @@ resource "aws_iam_policy" "rds_iam_auth" {
   policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
-// Create DB User(Optional)
-// TODO: Lambda
+// Create DB User
+resource "aws_lambda_function" "db_user_generator_lambda" {
+  function_name = "db-user-generator-lambda-${local.cluster_identifier}"
+  role          = aws_iam_role.lambda_migration_role[0].arn
+  package_type  = "Image"
+  image_uri = "${local.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
+  timeout       = 900
+
+  vpc_config {
+    subnet_ids         = local.cluster_instances_subnet_ids
+    security_group_ids = [aws_security_group.lambda_security_group.id]
+  }
+
+  environment {
+    variables = {
+      DB_SECRET_ARN = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
+    }
+  }
+}
+
+resource "terraform_data" "db_user_generator_lambda_invoke" {
+  triggers_replace = [
+    aws_lambda_function.db_user_generator_lambda.id
+  ]
+
+  provisioner "local-exec" {
+    command = <<EOT
+    aws lambda invoke \
+      --function-name ${aws_lambda_function.db_user_generator_lambda.function_name} \
+      --region ${data.aws_region.current.name} \
+      --cli-binary-format raw-in-base64-out \
+      --payload '{ "username": ${local.database_username} }' \
+      /dev/stdout
+    EOT
+  }
+}
+
+
+resource "aws_vpc_security_group_ingress_rule" "allow_lambda_security_group" {
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  security_group_id = aws_security_group.rds_cluster_security_group.id
+  referenced_security_group_id = aws_security_group.lambda_security_group.id
+}
+
+resource "aws_security_group" "lambda_security_group" {
+  vpc_id = local.cluster_vpc_id
+  name   = "lambda-security-group-${local.cluster_identifier}"
+}
+
+resource "aws_vpc_security_group_egress_rule" "lambda_security_group_rule" {
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.lambda_security_group.id
+}
 
 // DB Access(Optional)
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
@@ -108,7 +162,7 @@ resource "aws_lambda_function" "migration_lambda" {
 
   vpc_config {
     subnet_ids         = local.cluster_instances_subnet_ids
-    security_group_ids = [aws_security_group.lambda_migration_security_group[0].id]
+    security_group_ids = [aws_security_group.lambda_security_group.id]
   }
 
   environment {
@@ -148,26 +202,4 @@ resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach_to_lambda" {
   count = local.create_migration ? 1 : 0
   role       = aws_iam_role.lambda_migration_role[0].name
   policy_arn = aws_iam_policy.rds_iam_auth[0].arn
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_lambda_migration_security_group" {
-  count = local.create_migration ? 1 : 0
-  from_port         = 3306
-  to_port           = 3306
-  ip_protocol       = "tcp"
-  security_group_id = aws_security_group.rds_cluster_security_group.id
-  referenced_security_group_id = aws_security_group.lambda_migration_security_group[0].id
-}
-
-resource "aws_security_group" "lambda_migration_security_group" {
-  count = local.create_migration ? 1 : 0
-  vpc_id = local.cluster_vpc_id
-  name   = "lambda-migration-security-group-${local.cluster_identifier}"
-}
-
-resource "aws_vpc_security_group_egress_rule" "lambda_migration_security_group_rule" {
-  count = local.create_migration ? 1 : 0
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.lambda_migration_security_group[0].id
 }

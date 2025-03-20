@@ -23,3 +23,9 @@ locals {
 
   create_iam_database_auth = local.create_database_access || local.create_migration
 }
+
+locals {
+  ms_db_user_generator = {
+    image_tag = "dev-20250311-232108-f0ed983"
+  }
+}
