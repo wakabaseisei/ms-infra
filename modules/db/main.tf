@@ -75,6 +75,9 @@ resource "aws_lambda_function" "db_user_generator_lambda" {
   environment {
     variables = {
       DB_SECRET_ARN = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
+      DB_HOST = aws_rds_cluster.cluster.endpoint
+      DB_PORT = 3306
+      DB_NAME = local.database_name
     }
   }
 }
