@@ -118,6 +118,27 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access_execution_role_to_d
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "get_secret_to_db_gen_lambda_role" {
+  role       = aws_iam_role.db_user_generator_lambda_invoke_role.name
+  policy_arn = aws_iam_policy.secretsmanager_get_secret.arn
+}
+
+resource "aws_iam_policy" "secretsmanager_get_secret" {
+  name        = "secretsmanager-get-secret"
+  description = "Policy to allow access to Secrets Manager GetSecretValue"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "secretsmanager:GetSecretValue"
+        Resource = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
+      }
+    ]
+  })
+}
+
 resource "aws_vpc_security_group_ingress_rule" "allow_lambda_security_group" {
   from_port         = 3306
   to_port           = 3306
