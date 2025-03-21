@@ -29,3 +29,7 @@ locals {
     image_tag = "dev-20250320-145859-15fe8c5"
   }
 }
+
+locals {
+  rds_ca_cert_identifier = "rds-ca-rsa2048-g1"
+}
