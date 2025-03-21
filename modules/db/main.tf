@@ -31,6 +31,7 @@ resource "aws_rds_cluster_instance" "writer" {
   engine             = aws_rds_cluster.cluster.engine
   engine_version     = aws_rds_cluster.cluster.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds.name
+  ca_cert_identifier = local.rds_ca_cert_identifier
 }
 
 resource "aws_rds_cluster_instance" "reader" {
@@ -41,6 +42,7 @@ resource "aws_rds_cluster_instance" "reader" {
   engine             = aws_rds_cluster.cluster.engine
   engine_version     = aws_rds_cluster.cluster.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds.name
+  ca_cert_identifier = local.rds_ca_cert_identifier
 }
 
 resource "aws_db_subnet_group" "rds" {
