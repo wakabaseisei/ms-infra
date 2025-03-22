@@ -170,7 +170,7 @@ data "aws_iam_policy_document" "rds_iam_auth" {
     effect = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser/${aws_rds_cluster.cluster.cluster_resource_id}/${local.database_username}"
+      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser:${aws_rds_cluster.cluster.cluster_resource_id}/${local.database_username}"
     ]
   }
 }
