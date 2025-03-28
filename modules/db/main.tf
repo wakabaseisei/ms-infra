@@ -82,6 +82,8 @@ resource "aws_lambda_function" "db_user_generator_lambda" {
       DB_NAME = local.database_name
     }
   }
+
+  depends_on = [ aws_rds_cluster.cluster ]
 }
 
 resource "terraform_data" "db_user_generator_lambda_invoke" {

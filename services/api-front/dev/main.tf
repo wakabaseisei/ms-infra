@@ -31,4 +31,8 @@ module "aurora" {
     image_tag = "dev-20250327-235159-ff884ba"
     entry_point = ["/bin/migrate-lambda"]
   }
+#   database_access_client = {
+#     role = module.tenant.irsa_role_name
+#     security_group_id = data.terraform_remote_state.common.outputs.eks_node_security_group_id
+#   }
 }
