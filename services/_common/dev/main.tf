@@ -153,9 +153,9 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 }
 
-module "cicd" {
-  source = "../../../modules/cicd"
-  depends_on = [
-    module.eks
-  ]
-}
+# module "cicd" {
+#   source = "../../../modules/cicd"
+#   depends_on = [
+#     module.eks
+#   ]
+# }
