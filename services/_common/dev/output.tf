@@ -16,6 +16,6 @@ output "eks_oidc_provider" {
   value = module.eks.oidc_provider
 }
 
-output "eks_node_security_group_id" {
-  value = module.eks.node_security_group_id
+output "eks_cluster_security_group_id" {
+  value = module.eks.cluster_primary_security_group_id
 }
