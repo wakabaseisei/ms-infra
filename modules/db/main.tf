@@ -62,46 +62,46 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 }
 
 // Create DB User
-resource "aws_lambda_function" "db_user_generator_lambda" {
-  function_name = "db-user-generator-lambda-${local.cluster_identifier}"
-  role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
-  package_type  = "Image"
-  image_uri = "${local.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
-  timeout       = 900
+# resource "aws_lambda_function" "db_user_generator_lambda" {
+#   function_name = "db-user-generator-lambda-${local.cluster_identifier}"
+#   role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
+#   package_type  = "Image"
+#   image_uri = "${local.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
+#   timeout       = 900
 
-  vpc_config {
-    subnet_ids         = local.cluster_instances_subnet_ids
-    security_group_ids = [aws_security_group.lambda_security_group.id]
-  }
+#   vpc_config {
+#     subnet_ids         = local.cluster_instances_subnet_ids
+#     security_group_ids = [aws_security_group.lambda_security_group.id]
+#   }
 
-  environment {
-    variables = {
-      DB_SECRET_ARN = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
-      DB_HOST = aws_rds_cluster.cluster.endpoint
-      DB_PORT = 3306
-      DB_NAME = local.database_name
-    }
-  }
+#   environment {
+#     variables = {
+#       DB_SECRET_ARN = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
+#       DB_HOST = aws_rds_cluster.cluster.endpoint
+#       DB_PORT = 3306
+#       DB_NAME = local.database_name
+#     }
+#   }
 
-  depends_on = [ aws_rds_cluster.cluster ]
-}
+#   depends_on = [ aws_rds_cluster.cluster, aws_rds_cluster_instance.writer ]
+# }
 
-resource "terraform_data" "db_user_generator_lambda_invoke" {
-  triggers_replace = [
-    aws_lambda_function.db_user_generator_lambda.id
-  ]
+# resource "terraform_data" "db_user_generator_lambda_invoke" {
+#   triggers_replace = [
+#     aws_lambda_function.db_user_generator_lambda.id
+#   ]
 
-  provisioner "local-exec" {
-    command = <<EOT
-    aws lambda invoke \
-      --function-name ${aws_lambda_function.db_user_generator_lambda.function_name} \
-      --region ${data.aws_region.current.name} \
-      --cli-binary-format raw-in-base64-out \
-      --payload '{ "username": "${local.database_username}" }' \
-      /dev/stdout
-    EOT
-  }
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#     aws lambda invoke \
+#       --function-name ${aws_lambda_function.db_user_generator_lambda.function_name} \
+#       --region ${data.aws_region.current.name} \
+#       --cli-binary-format raw-in-base64-out \
+#       --payload '{ "username": "${local.database_username}" }' \
+#       /dev/stdout
+#     EOT
+#   }
+# }
 
 resource "aws_iam_role" "db_user_generator_lambda_invoke_role" {
   name = "user-gen-lambda-role-${local.cluster_identifier}"
