@@ -33,6 +33,6 @@ module "aurora" {
   }
   database_access_client = {
     role = module.tenant.irsa_role_name
-    security_group_id = data.terraform_remote_state.common.outputs.eks_node_security_group_id
+    security_group_id = data.terraform_remote_state.common.outputs.eks_cluster_security_group_id
   }
 }
