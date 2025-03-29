@@ -25,9 +25,9 @@ module "aurora" {
   database_username = local.service_name
   account_id = data.aws_caller_identity.current.account_id
   migration_lambda = {
-    # CIで置き換えるため、仮のURLとして設定
+    # CIで置き換えるため仮のURLとして設定
     image_url = "148761642613.dkr.ecr.ap-northeast-1.amazonaws.com/api-front"
-    # CIで置き換えるため、仮のタグとして設定
+    # CIで置き換えるため仮のタグとして設定
     image_tag = "dev-20250328-220401-d0b230f"
     entry_point = ["/bin/migrate-lambda"]
   }
