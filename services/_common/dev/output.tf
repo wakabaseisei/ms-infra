@@ -12,10 +12,10 @@ output "vpc_id" {
 }
 
 // NOTE: Disable to reduce cost when eks cluster is not used.
-# output "eks_oidc_provider" {
-#   value = module.eks.oidc_provider
-# }
+output "eks_oidc_provider" {
+  value = module.eks.oidc_provider
+}
 
-# output "eks_cluster_security_group_id" {
-#   value = module.eks.cluster_primary_security_group_id
-# }
+output "eks_cluster_security_group_id" {
+  value = module.eks.cluster_primary_security_group_id
+}
