@@ -36,3 +36,17 @@ module "tenant" {
 #     security_group_id = data.terraform_remote_state.common.outputs.eks_cluster_security_group_id
 #   }
 # }
+
+// NOTE: Disabled to reduce costs. Uncomment out only when used.
+module "cloudfront-vpc-origin" {
+  source = "../../../modules/cloudfront-vpc-origin"
+  private_alb_arn = data.aws_alb.vpc-oritin.arn
+  private_alb_domain_name = data.aws_alb.vpc-oritin.dns_name
+  private_alb_http_port = 8080
+  private_alb_https_port = 443
+  vpc_origin_prefix = local.service_name
+}
+
+data "aws_alb" "vpc-oritin" {
+  arn = local.private_alb_arn
+}
