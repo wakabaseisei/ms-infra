@@ -62,7 +62,7 @@ data "aws_security_group" "private_alb_sg" {
 resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
   security_group_id            = data.aws_security_group.private_alb_sg.id
   ip_protocol                  = "tcp"
-  from_port                    = 80
-  to_port                      = 80
+  from_port                    = local.private_alb_http_port
+  to_port                      = local.private_alb_http_port
   referenced_security_group_id = data.aws_security_group.vpc_origin_sg.id
 }
