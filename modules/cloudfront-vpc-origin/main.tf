@@ -1,7 +1,13 @@
+data "aws_alb" "private_alb_for_vpc_origin" {
+  tags = {
+    "ingress.eks.amazonaws.com/resource" = "LoadBalancer"
+  }
+}
+
 resource "aws_cloudfront_vpc_origin" "alb" {
   vpc_origin_endpoint_config {
     name                   = local.vpc_origin_endpoint_config_name
-    arn                    = local.private_alb_arn
+    arn                    = data.aws_alb.private_alb_for_vpc_origin.arn
     http_port              = local.private_alb_http_port
     https_port             = local.private_alb_https_port
     origin_protocol_policy = "http-only"
@@ -15,7 +21,7 @@ resource "aws_cloudfront_vpc_origin" "alb" {
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    domain_name = local.private_alb_domain_name
+    domain_name = data.aws_alb.private_alb_for_vpc_origin.dns_name
     origin_id   = local.origin_id
     vpc_origin_config {
       vpc_origin_id = aws_cloudfront_vpc_origin.alb.id
@@ -40,4 +46,23 @@ resource "aws_cloudfront_distribution" "main" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+}
+
+data "aws_security_group" "vpc_origin_sg" {
+  name = "CloudFront-VPCOrigins-Service-SG"
+  depends_on = [aws_cloudfront_vpc_origin.alb]
+}
+
+data "aws_security_group" "private_alb_sg" {
+  tags = {
+    "ingress.eks.amazonaws.com/resource"= "ManagedLBSecurityGroup"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
+  security_group_id            = data.aws_security_group.private_alb_sg.id
+  ip_protocol                  = "tcp"
+  from_port                    = 80
+  to_port                      = 80
+  referenced_security_group_id = data.aws_security_group.vpc_origin_sg.id
 }
