@@ -11,3 +11,5 @@ variable "private_alb_https_port" {
 variable "vpc_origin_prefix" {
   type = string
 }
+
+# TODO: EKS Ingressで作成されたALBか否かで設定を変える
