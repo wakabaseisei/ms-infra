@@ -41,6 +41,7 @@ resource "aws_cloudfront_distribution" "main" {
     target_origin_id       = local.origin_id
     viewer_protocol_policy = "redirect-to-https"
     cache_policy_id = "83da9c7e-98b4-4e11-a168-04f0df8e2c65"
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
   }
 
   viewer_certificate {
