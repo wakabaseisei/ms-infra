@@ -41,7 +41,7 @@ resource "aws_cloudfront_origin_access_control" "main" {
 
 resource "aws_cloudfront_distribution" "static_site" {
   origin {
-    domain_name = data.aws_alb.private_alb_for_vpc_origin.dns_name
+    domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
     origin_id   = aws_s3_bucket.static_site.id
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
