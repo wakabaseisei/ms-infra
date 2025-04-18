@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
 resource "aws_s3_bucket" "static_site" {
-  bucket = local.github_repository_name
+  bucket = "${local.unique_prefix}-${local.github_repository_name}"
 }
 
 resource "aws_s3_bucket_policy" "allow_cloudfront_access" {
