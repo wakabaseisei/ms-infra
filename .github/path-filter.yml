@@ -6,3 +6,5 @@ services/api-front/dev:
   - 'services/api-front/dev/*'
 services/ms-web/dev:
   - 'services/ms-web/dev/*'
+services/ms-user/dev:
+  - 'services/ms-user/dev/*'
