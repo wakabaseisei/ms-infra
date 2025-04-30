@@ -6,3 +6,5 @@ services/api-front/dev:
   AWS_ACCOUNT_ID: AWS_ACCOUNT_ID_DEV
 services/ms-web/dev:
   AWS_ACCOUNT_ID: AWS_ACCOUNT_ID_DEV
+services/ms-user/dev:
+  AWS_ACCOUNT_ID: AWS_ACCOUNT_ID_DEV
