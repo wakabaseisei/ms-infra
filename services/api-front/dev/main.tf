@@ -10,7 +10,7 @@ module "tenant" {
 }
 
 // NOTE: Disabled to reduce costs. Uncomment out only when used.
-# module "cloudfront-vpc-origin" {
-#   source = "../../../modules/cloudfront-vpc-origin"
-#   vpc_origin_prefix = local.service_name
-# }
+module "cloudfront-vpc-origin" {
+  source = "../../../modules/cloudfront-vpc-origin"
+  vpc_origin_prefix = local.service_name
+}
