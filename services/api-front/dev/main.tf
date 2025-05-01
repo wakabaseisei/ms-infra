@@ -7,11 +7,6 @@ module "tenant" {
     namespace = local.service_name
     account_id = data.aws_caller_identity.current.account_id
     github_repository_name = local.service_name
-    // NOTE: Disabled to reduce costs. Uncomment out only when used.
-    # eks = {
-    #   service_account_name = local.service_name
-    #   oidc_provider = data.terraform_remote_state.common.outputs.eks_oidc_provider
-    # }
 }
 
 // NOTE: Disabled to reduce costs. Uncomment out only when used.
