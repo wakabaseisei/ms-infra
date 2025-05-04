@@ -66,7 +66,7 @@ resource "aws_eks_cluster" "this" {
 # IAM Role for Node
 
 resource "aws_iam_role" "node" {
-  name = "${local.env}-eks-auto-node"
+  name = "eks-auto-node-example"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryPullOn
 # IAM Role for Cluster
 
 resource "aws_iam_role" "cluster" {
-  name = "${local.env}-eks-cluster"
+  name = "eks-cluster-example"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
