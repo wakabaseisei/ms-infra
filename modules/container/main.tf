@@ -153,17 +153,6 @@ data "tls_certificate" "eks" {
   url = aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
-# Log
-
-resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
-  name = "/aws/eks/${aws_eks_cluster.this.name}/cluster"
-  retention_in_days = 3
-
-  tags = {
-    Name = "/aws/eks/${aws_eks_cluster.this.name}/cluster"
-  }
-}
-
 # Kubernetes Secrets resource encryption
 
 resource "aws_kms_key" "eks_cluster" {
