@@ -16,7 +16,7 @@ module "tenant" {
 
 # // NOTE: Disabled to reduce costs. Uncomment out only when used.
 module "aurora" {
-  source = "../../../modules/db"
+  source = "../../../modules/database"
   cluster_identifier = local.service_name
   cluster_vpc_id = data.terraform_remote_state.common.outputs.vpc_id
   cluster_instances_subnet_ids = data.terraform_remote_state.common.outputs.database_subnets
