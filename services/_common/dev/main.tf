@@ -24,7 +24,7 @@ module "vpc" {
   database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
 
   // NOTE: Disable to reduce cost when eks cluster is not used.
-  enable_nat_gateway = true
+  # enable_nat_gateway = true
 
   # For use with AWS Load Balancer Controller
   public_subnet_tags = {
@@ -37,11 +37,11 @@ module "vpc" {
 }
 
 # NOTE: For cost-saving purposes, the unused resources are commented out when they are not in use.
-module "container" {
-  source = "../../../modules/container"
-  env = local.env
-  cluster_vpc_subnets = module.vpc.private_subnets
-  vpc_id = module.vpc.vpc_id
-  private_route_table_ids = module.vpc.private_route_table_ids
-  private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-}
+# module "container" {
+#   source = "../../../modules/container"
+#   env = local.env
+#   cluster_vpc_subnets = module.vpc.private_subnets
+#   vpc_id = module.vpc.vpc_id
+#   private_route_table_ids = module.vpc.private_route_table_ids
+#   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+# }
