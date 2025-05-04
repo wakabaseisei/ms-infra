@@ -283,7 +283,7 @@ resource "aws_security_group" "vpc_endpoints" {
 # AgroCD
 
 resource "helm_release" "argocd" {
-  count = local.argocd.enable ? 1 : 0
+  # count = local.argocd.enable ? 1 : 0
   name = local.argocd.helm.release_name
   repository = local.argocd.helm.repository
   chart = local.argocd.helm.chart_name
