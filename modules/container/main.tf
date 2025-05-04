@@ -231,10 +231,10 @@ resource "aws_eks_access_policy_association" "cluster_creator_admin" {
 # VPC Endpoint
 
 resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id            = module.vpc.vpc_id
+  vpc_id            = local.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = module.vpc.private_subnets
+  subnet_ids        = local.cluster_vpc_subnets
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 
@@ -244,10 +244,10 @@ resource "aws_vpc_endpoint" "ecr_api" {
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id            = module.vpc.vpc_id
+  vpc_id            = local.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = module.vpc.private_subnets
+  subnet_ids        = local.cluster_vpc_subnets
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 
@@ -257,10 +257,10 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = module.vpc.vpc_id
+  vpc_id            = local.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = module.vpc.private_route_table_ids
+  route_table_ids   = local.private_route_table_ids
 
   tags = {
     Name = "S3-Gateway-Endpoint"
@@ -270,13 +270,13 @@ resource "aws_vpc_endpoint" "s3" {
 resource "aws_security_group" "vpc_endpoints" {
   name        = "${local.env}-vpc-endpoints-sg"
   description = "Security group for VPC endpoints"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = local.vpc_id
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
+    cidr_blocks = local.private_subnets_cidr_blocks
   }
 
   egress {
