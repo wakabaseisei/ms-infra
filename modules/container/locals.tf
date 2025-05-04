@@ -1,4 +1,6 @@
 locals {
+  env = var.env
+  cluster_vpc_subnets = var.cluster_vpc_subnets
   argocd = {
     namespace = var.argocd_namespace
     helm = {

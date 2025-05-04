@@ -21,3 +21,13 @@ variable "argocd_release_name" {
   description = "ArgoCD helm release name"
   default = "argocd"
 }
+
+variable "env" {
+  type = string
+  description = ""
+}
+
+variable "cluster_vpc_subnets" {
+  type = set(string)
+  description = "List of subnet IDs. Must be in at least two different availability zones."
+}
