@@ -6,6 +6,7 @@ locals {
   private_subnets_cidr_blocks= var.private_subnets_cidr_blocks
 
   argocd = {
+    enable = var.enable_argocd
     namespace = var.argocd_namespace
     helm = {
       repository = "https://argoproj.github.io/argo-helm"
