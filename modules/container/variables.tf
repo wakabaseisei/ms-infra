@@ -43,3 +43,8 @@ variable "private_route_table_ids" {
 variable "private_subnets_cidr_blocks" {
   type = list(string)
 }
+
+variable "enable_argocd" {
+  type = bool
+  default = false
+}
