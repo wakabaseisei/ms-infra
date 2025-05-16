@@ -1,8 +1,8 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-module "tenant" {
-    source = "../../../modules/tenant"
+module "application" {
+    source = "../../../modules/application"
 
     namespace = local.service_name
     account_id = data.aws_caller_identity.current.account_id
@@ -32,7 +32,7 @@ module "tenant" {
 #     entry_point = ["/bin/migrate-lambda"]
 #   }
 #   database_access_client = {
-#     role = module.tenant.irsa_role_name
+#     role = module.application.irsa_role_name
 #     security_group_id = data.terraform_remote_state.common.outputs.eks_cluster_security_group_id
 #   }
 # }

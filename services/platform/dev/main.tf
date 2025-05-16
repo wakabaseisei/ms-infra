@@ -1,15 +1,12 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-module "github" {
-    source = "../../../modules/github"
-    account_id = data.aws_caller_identity.current.account_id
+module "tf-pipeline" {
+    source = "../../../modules/tf-pipeline"
 }
 
 module "db_user_generator" {
-  source = "../../../modules/docker-image-push"
-  account_id = data.aws_caller_identity.current.account_id
-  github_repository_name = "ms-db-user-generator"
+  source = "../../../modules/database-user-generator"
 }
 
 module "vpc" {
@@ -36,8 +33,8 @@ module "vpc" {
 }
 
 # NOTE: For cost-saving purposes, the unused resources are commented out when they are not in use.
-# module "container" {
-#   source = "../../../modules/container"
+# module "container-orchestration" {
+#   source = "../../../modules/container-orchestration"
 #   env = local.env
 #   cluster_vpc_subnets = module.vpc.private_subnets
 #   vpc_id = module.vpc.vpc_id

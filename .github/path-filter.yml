@@ -1,7 +1,7 @@
 platform:
   - 'platform/*'
-services/_common/dev:
-  - 'services/_common/dev/*'
+services/platform/dev:
+  - 'services/platform/dev/*'
 services/api-front/dev:
   - 'services/api-front/dev/*'
 services/ms-web/dev:
