@@ -1,15 +1,15 @@
-# output "private_subnets" {
-#   value = module.vpc.private_subnets
-# }
+output "private_subnets" {
+  value = module.vpc.private_subnets
+}
 
-# output "database_subnets" {
-#   value = module.vpc.database_subnets
-#   description = "List of IDs of database subnets"
-# }
+output "database_subnets" {
+  value = module.vpc.database_subnets
+  description = "List of IDs of database subnets"
+}
 
-# output "vpc_id" {
-#   value = module.vpc.vpc_id
-# }
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
 
 // NOTE: Disable to reduce cost when eks cluster is not used.
 # output "eks_oidc_provider" {
