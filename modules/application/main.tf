@@ -54,12 +54,12 @@ resource "aws_iam_role" "irsa" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.eks.oidc_provider}"
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${var.eks.oidc_provider}"
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.eks.oidc_provider}:sub" = "system:serviceaccount:${var.namespace}:${local.eks.service_account_name}"
+            "${var.eks.oidc_provider}:sub" = "system:serviceaccount:${var.namespace}:${var.eks.service_account_name}"
           }
         }
       }
