@@ -1,4 +1,5 @@
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 resource "aws_rds_cluster" "cluster" {
   cluster_identifier = var.cluster_identifier
@@ -66,7 +67,7 @@ resource "aws_lambda_function" "db_user_generator_lambda" {
   function_name = "db-user-generator-lambda-${var.cluster_identifier}"
   role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
   package_type  = "Image"
-  image_uri = "${var.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
+  image_uri = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
   timeout       = 900
 
   vpc_config {
@@ -172,7 +173,7 @@ data "aws_iam_policy_document" "rds_iam_auth" {
     effect = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${data.aws_region.current.name}:${var.account_id}:dbuser:${aws_rds_cluster.cluster.cluster_resource_id}/${var.database_username}"
+      "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.cluster.cluster_resource_id}/${var.database_username}"
     ]
   }
 }

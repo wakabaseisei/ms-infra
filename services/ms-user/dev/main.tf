@@ -5,7 +5,6 @@ module "application" {
     source = "../../../modules/application"
 
     namespace = local.service_name
-    account_id = data.aws_caller_identity.current.account_id
     github_repository_name = local.service_name
     // NOTE: Disabled to reduce costs. Uncomment out only when used.
     # eks = {
@@ -23,7 +22,6 @@ module "application" {
 #   database_name = local.service_name_letter
 #   reader_instance_classes = [ "db.serverless", "db.serverless" ]
 #   database_username = local.service_name
-#   account_id = data.aws_caller_identity.current.account_id
 #   migration_lambda = {
 #     # CIで置き換えるため、仮のURLとして設定
 #     image_url = "148761642613.dkr.ecr.ap-northeast-1.amazonaws.com/ms-user"
