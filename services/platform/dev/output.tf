@@ -11,7 +11,7 @@ output "vpc_id" {
   value = module.vpc.vpc_id
 }
 
-// NOTE: Disable to reduce cost when eks cluster is not used.
+# NOTE: Disable to reduce cost when eks cluster is not used.
 # output "eks_oidc_provider" {
 #   value = module.container-orchestration.cluster_oidc_provider
 #   description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"

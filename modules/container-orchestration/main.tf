@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_eks_cluster" "this" {
-  name = "${local.env}-eks"
+  name = "${var.env}-eks"
 
   access_config {
     authentication_mode = "API"
@@ -41,7 +41,7 @@ resource "aws_eks_cluster" "this" {
     endpoint_private_access = true
     endpoint_public_access  = true
 
-    subnet_ids = local.cluster_vpc_subnets
+    subnet_ids = var.cluster_vpc_subnets
   }
 
   encryption_config {
@@ -66,7 +66,7 @@ resource "aws_eks_cluster" "this" {
 # IAM Role for Node
 
 resource "aws_iam_role" "node" {
-  name = "${local.env}-eks-auto-node"
+  name = "${var.env}-eks-auto-node"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryPullOn
 # IAM Role for Cluster
 
 resource "aws_iam_role" "cluster" {
-  name = "${local.env}-eks-cluster"
+  name = "${var.env}-eks-cluster"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -145,7 +145,7 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = ["${data.tls_certificate.eks.certificates[0].sha1_fingerprint}"]
 
   tags = {
-    Name = "${local.env}-eks-irsa"
+    Name = "${var.env}-eks-irsa"
   }
 }
 
@@ -160,12 +160,12 @@ resource "aws_kms_key" "eks_cluster" {
   enable_key_rotation = true
 
   tags = {
-    Name = "${local.env}-eks-kms-key"
+    Name = "${var.env}-eks-kms-key"
   }
 }
 
 resource "aws_kms_alias" "eks_cluster" {
-  name_prefix = "alias/${local.env}-eks-kms-key"
+  name_prefix = "alias/${var.env}-eks-kms-key"
   target_key_id = aws_kms_key.eks_cluster.id
 }
 
@@ -220,10 +220,10 @@ resource "aws_eks_access_policy_association" "cluster_creator_admin" {
 # VPC Endpoint
 
 resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id            = local.vpc_id
+  vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = local.cluster_vpc_subnets
+  subnet_ids        = var.cluster_vpc_subnets
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 
@@ -233,10 +233,10 @@ resource "aws_vpc_endpoint" "ecr_api" {
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id            = local.vpc_id
+  vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = local.cluster_vpc_subnets
+  subnet_ids        = var.cluster_vpc_subnets
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 
@@ -246,10 +246,10 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = local.vpc_id
+  vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = local.private_route_table_ids
+  route_table_ids   = var.private_route_table_ids
 
   tags = {
     Name = "S3-Gateway-Endpoint"
@@ -257,15 +257,15 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_security_group" "vpc_endpoints" {
-  name        = "${local.env}-vpc-endpoints-sg"
+  name        = "${var.env}-vpc-endpoints-sg"
   description = "Security group for VPC endpoints"
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = local.private_subnets_cidr_blocks
+    cidr_blocks = var.private_subnets_cidr_blocks
   }
 
   egress {
@@ -276,7 +276,7 @@ resource "aws_security_group" "vpc_endpoints" {
   }
 
   tags = {
-    Name = "${local.env}-vpc-endpoints-sg"
+    Name = "${var.env}-vpc-endpoints-sg"
   }
 }
 
