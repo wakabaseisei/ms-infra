@@ -1,2 +1,16 @@
 modules/application:
   - 'modules/application/*'
+modules/container-orchestration:
+  - 'modules/container-orchestration/*'
+modules/database:
+  - 'modules/database/*'
+modules/database-user-generator:
+  - 'modules/database-user-generator/*'
+modules/gateway:
+  - 'modules/gateway/*'
+modules/network:
+  - 'modules/network/*'
+modules/tf-pipeline:
+  - 'modules/tf-pipeline/*'
+modules/web-hosting:
+  - 'modules/web-hosting/*'
