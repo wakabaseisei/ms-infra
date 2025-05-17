@@ -1,4 +1,4 @@
-name: terraform plan amd apply
+name: terraform modules
 on:
   pull_request:
 env:
