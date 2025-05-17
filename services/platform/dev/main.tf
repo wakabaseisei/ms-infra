@@ -36,10 +36,10 @@ module "vpc" {
 # module "container-orchestration" {
 #   source = "../../../modules/container-orchestration"
 #   env = local.env
-#   cluster_vpc_subnets = module.vpc.private_subnets
 #   vpc_id = module.vpc.vpc_id
-#   private_route_table_ids = module.vpc.private_route_table_ids
+#   cluster_vpc_subnets = module.vpc.private_subnets
 #   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+#   private_route_table_ids = module.vpc.private_route_table_ids
 
 #   # enable_argocd = true
 # }

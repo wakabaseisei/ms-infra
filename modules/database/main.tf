@@ -19,9 +19,9 @@ resource "aws_rds_cluster" "cluster" {
   dynamic "serverlessv2_scaling_configuration" {
     for_each = var.serverlessv2_scaling_configuration == null ? [] : [true]
     content {
-      max_capacity             = local.serverlessv2_scaling_configuration.max_capacity
-      min_capacity             = local.serverlessv2_scaling_configuration.min_capacity
-      seconds_until_auto_pause = local.serverlessv2_scaling_configuration.seconds_until_auto_pause
+      max_capacity             = var.serverlessv2_scaling_configuration.max_capacity
+      min_capacity             = var.serverlessv2_scaling_configuration.min_capacity
+      seconds_until_auto_pause = var.serverlessv2_scaling_configuration.seconds_until_auto_pause
     }
   }
 }
@@ -62,7 +62,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   security_group_id = aws_security_group.rds_cluster_security_group.id
 }
 
-// Create DB User
+# Create DB User
 resource "aws_lambda_function" "db_user_generator_lambda" {
   function_name = "db-user-generator-lambda-${var.cluster_identifier}"
   role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
@@ -166,7 +166,7 @@ resource "aws_vpc_security_group_egress_rule" "lambda_security_group_rule" {
   security_group_id = aws_security_group.lambda_security_group.id
 }
 
-// IAM Database Authentication(Optional)
+# IAM Database Authentication(Optional)
 data "aws_iam_policy_document" "rds_iam_auth" {
   count = local.create_iam_database_auth ? 1 : 0
   statement {
@@ -184,10 +184,10 @@ resource "aws_iam_policy" "rds_iam_auth" {
   policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
-// DB Access(Optional)
+# DB Access(Optional)
 resource "aws_iam_role_policy_attachment" "rds_iam_auth_attach" {
   count = local.create_database_access ? 1 : 0
-  role       = local.database_access_client.role
+  role       = var.database_access_client.role
   policy_arn = aws_iam_policy.rds_iam_auth[0].arn
 }
 
@@ -197,17 +197,17 @@ resource "aws_vpc_security_group_ingress_rule" "allow_database_access_client_sec
   to_port           = 3306
   ip_protocol       = "tcp"
   security_group_id = aws_security_group.rds_cluster_security_group.id
-  referenced_security_group_id = local.database_access_client.security_group_id
+  referenced_security_group_id = var.database_access_client.security_group_id
 }
 
-// DB Migration(Optional)
+# DB Migration(Optional)
 resource "aws_lambda_function" "migration_lambda" {
   count = local.create_migration ? 1 : 0
   function_name = "migrate-lambda-${var.cluster_identifier}"
   role          = aws_iam_role.lambda_migration_role[0].arn
   package_type  = "Image"
-  // https://qiita.com/Kyohei-takiyama/items/86e71e1f4f989bbfc665
-  image_uri     = "${local.migration_lambda.image_url}:${local.migration_lambda.image_tag}"
+  # https://qiita.com/Kyohei-takiyama/items/86e71e1f4f989bbfc665
+  image_uri     = "${var.migration_lambda.image_url}:${var.migration_lambda.image_tag}"
   timeout       = 900
 
   vpc_config {

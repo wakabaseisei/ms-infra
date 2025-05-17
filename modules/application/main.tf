@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-// use for GitHub Actions docker image push workflow.
+# Use for GitHub Actions docker image push workflow.
 resource "aws_iam_role" "github_actions_docker_image_push" {
   name = "github_actions_docker_image_push-${var.github_repository_name}"
 
@@ -32,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_docker_image_push" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-// ECR
+# ECR
 resource "aws_ecr_repository" "repo" {
   name                 = var.namespace
   image_tag_mutability = "IMMUTABLE"
@@ -42,10 +42,10 @@ resource "aws_ecr_repository" "repo" {
   }
 }
 
-// IRSA
-// https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest#output_oidc_provider_arn
+# IRSA
+# https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest#output_oidc_provider_arn
 resource "aws_iam_role" "irsa" {
-  count = var.eks == null ? 0 : 1
+  count = local.create_eks_irsa ? 1 : 0
   name = "irsa-${var.namespace}"
 
   assume_role_policy = jsonencode({

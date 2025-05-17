@@ -70,7 +70,7 @@ resource "aws_cloudfront_distribution" "static_site" {
   }
 }
 
-// use for GitHub Actions to deploy static files to S3.
+# Use for GitHub Actions to deploy static files to S3.
 resource "aws_iam_role" "github_actions_s3_deploy_role" {
   name = "github-actions-s3-deploy-role-${var.github_repository_name}"
 

@@ -1,54 +1,59 @@
 variable "name" {
-  description = "Name to be used on all the resources as identifier"
+  description = "A name prefix to be used for all resources created by this module, providing a common identifier."
   type        = string
 }
 
 variable "azs" {
-  type = list(string)
+  type        = list(string)
+  description = "A list of Availability Zones where subnets will be created. The order determines the AZ for each subnet in the lists."
 }
 
 variable "cidr" {
-  type = string
+  type        = string
+  description = "The CIDR block for the VPC."
 }
 
 variable "public_subnets" {
-  type = list(string)
+  type        = list(string)
+  description = "A list of CIDR blocks for the public subnets to be created within the VPC."
 }
 
 variable "public_subnet_tags" {
-  description = "Additional tags for the public subnets"
+  description = "Additional tags to apply to the public subnets."
   type        = map(string)
   default     = {}
 }
 
 variable "private_subnets" {
-  type = list(string)
+  type        = list(string)
+  description = "A list of CIDR blocks for the private subnets to be created within the VPC."
 }
 
 variable "private_subnet_tags" {
-  description = "Additional tags for the private subnets"
+  description = "Additional tags to apply to the private subnets."
   type        = map(string)
   default     = {}
 }
 
 variable "database_subnets" {
-  type = list(string)
+  type        = list(string)
+  description = "A list of CIDR blocks for the database subnets to be created within the VPC."
 }
 
 variable "database_subnets_tags" {
-  description = "Additional tags for the database subnets"
+  description = "Additional tags to apply to the database subnets."
   type        = map(string)
   default     = {}
 }
 
 variable "enable_nat_gateway" {
-  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
+  description = "A boolean flag to determine if NAT Gateways should be provisioned for each private subnet, allowing outbound internet access."
   type        = bool
   default     = false
 }
 
 variable "one_nat_gateway_per_az" {
-  description = "Should be true if you want only one NAT Gateway per availability zone. Requires `var.azs` to be set, and the number of `public_subnets` created to be greater than or equal to the number of availability zones specified in `var.azs`"
+  description = "A boolean flag to provision only one NAT Gateway per Availability Zone. Requires `var.azs` to be set and the number of public subnets to be greater than or equal to the number of AZs."
   type        = bool
   default     = false
 }

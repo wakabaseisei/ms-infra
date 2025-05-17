@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-// use for GitHub Actions docker image push workflow.
+# use for GitHub Actions docker image push workflow.
 resource "aws_iam_role" "github_actions_docker_image_push" {
   name = "github_actions_docker_image_push-ms-db-user-generator"
 
@@ -32,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_docker_image_push" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-// ECR
+# ECR
 resource "aws_ecr_repository" "repo" {
   name                 = "ms-db-user-generator"
   image_tag_mutability = "IMMUTABLE"
