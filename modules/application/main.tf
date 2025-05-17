@@ -32,6 +32,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_docker_image_push" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
+# ECR
 resource "aws_ecr_repository" "repo" {
   name                 = var.namespace
   image_tag_mutability = "IMMUTABLE"

@@ -44,6 +44,8 @@ jobs:
         with:
             output-method: inject
             git-push: "true"
+            working-dir: ${{ fromJSON(needs.determine-workdir.outputs.workdirs) }}
+            
   status-check:
     needs: [determine-workdir, generate-docs]
     if: failure()
