@@ -44,7 +44,7 @@ jobs:
         with:
             output-method: inject
             git-push: "true"
-            working-dir: ${{ fromJSON(needs.determine-workdir.outputs.workdirs) }}
+            working-dir: ${{ matrix.workdir }}
             
   status-check:
     needs: [determine-workdir, generate-docs]
