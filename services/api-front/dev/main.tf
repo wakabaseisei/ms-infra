@@ -8,7 +8,7 @@ module "application" {
     github_repository_name = local.service_name
 }
 
-// NOTE: Disabled to reduce costs. Uncomment out only when used.
+# NOTE: Disabled to reduce costs. Uncomment out only when used.
 # module "gateway" {
 #   source = "../../../modules/gateway"
 #   vpc_origin_prefix = local.service_name
