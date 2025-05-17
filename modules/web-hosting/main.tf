@@ -1,7 +1,8 @@
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "static_site" {
-  bucket = "${local.unique_prefix}-${local.github_repository_name}"
+  bucket = "${local.unique_prefix}-${var.github_repository_name}"
 }
 
 resource "aws_s3_bucket_policy" "allow_cloudfront_access" {
@@ -71,7 +72,7 @@ resource "aws_cloudfront_distribution" "static_site" {
 
 // use for GitHub Actions to deploy static files to S3.
 resource "aws_iam_role" "github_actions_s3_deploy_role" {
-  name = "github-actions-s3-deploy-role-${local.github_repository_name}"
+  name = "github-actions-s3-deploy-role-${var.github_repository_name}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -79,12 +80,12 @@ resource "aws_iam_role" "github_actions_s3_deploy_role" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Federated" : "arn:aws:iam::${local.account_id}:oidc-provider/token.actions.githubusercontent.com"
+          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringLike" : {
-            "token.actions.githubusercontent.com:sub" : "repo:wakabaseisei/${local.github_repository_name}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" : "repo:wakabaseisei/${var.github_repository_name}:ref:refs/heads/main"
           },
           "StringEquals" : {
             "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
@@ -96,7 +97,7 @@ resource "aws_iam_role" "github_actions_s3_deploy_role" {
 }
 
 resource "aws_iam_policy" "github_actions_s3_deploy_policy" {
-  name        = "github-actions-s3-deploy-policy-${local.github_repository_name}"
+  name        = "github-actions-s3-deploy-policy-${var.github_repository_name}"
   description = "Permissions for GitHub Actions to deploy static files to S3"
   policy = jsonencode({
     Version = "2012-10-17"

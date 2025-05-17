@@ -1,12 +1,13 @@
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 resource "aws_rds_cluster" "cluster" {
-  cluster_identifier = local.cluster_identifier
-  engine             = local.engine
-  engine_mode        = local.engine_mode
-  engine_version     = local.engine_version
-  database_name      = local.database_name
-  master_username    = local.master_username
+  cluster_identifier = var.cluster_identifier
+  engine             = var.engine
+  engine_mode        = var.engine_mode
+  engine_version     = var.engine_version
+  database_name      = var.database_name
+  master_username    = var.master_username
   db_subnet_group_name = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds_cluster_security_group.id]
   iam_database_authentication_enabled = true
@@ -16,7 +17,7 @@ resource "aws_rds_cluster" "cluster" {
   apply_immediately = true
 
   dynamic "serverlessv2_scaling_configuration" {
-    for_each = local.serverlessv2_scaling_configuration == null ? [] : [true]
+    for_each = var.serverlessv2_scaling_configuration == null ? [] : [true]
     content {
       max_capacity             = local.serverlessv2_scaling_configuration.max_capacity
       min_capacity             = local.serverlessv2_scaling_configuration.min_capacity
@@ -27,7 +28,7 @@ resource "aws_rds_cluster" "cluster" {
 
 resource "aws_rds_cluster_instance" "writer" {
   cluster_identifier = aws_rds_cluster.cluster.id
-  instance_class     = local.writer_instance_class_type
+  instance_class     = var.writer_instance_class_type
   engine             = aws_rds_cluster.cluster.engine
   engine_version     = aws_rds_cluster.cluster.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds.name
@@ -35,7 +36,7 @@ resource "aws_rds_cluster_instance" "writer" {
 }
 
 resource "aws_rds_cluster_instance" "reader" {
-  for_each = { for idx, class in local.reader_instance_classes : idx => class }
+  for_each = { for idx, class in var.reader_instance_classes : idx => class }
 
   cluster_identifier = aws_rds_cluster.cluster.id
   instance_class     = each.value
@@ -47,11 +48,11 @@ resource "aws_rds_cluster_instance" "reader" {
 
 resource "aws_db_subnet_group" "rds" {
   name = "rds"
-  subnet_ids = local.cluster_instances_subnet_ids
+  subnet_ids = var.cluster_instances_subnet_ids
 }
 
 resource "aws_security_group" "rds_cluster_security_group" {
-  vpc_id = local.cluster_vpc_id
+  vpc_id = var.cluster_vpc_id
   name   = "rds-security-group"
 }
 
@@ -63,14 +64,14 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 
 // Create DB User
 resource "aws_lambda_function" "db_user_generator_lambda" {
-  function_name = "db-user-generator-lambda-${local.cluster_identifier}"
+  function_name = "db-user-generator-lambda-${var.cluster_identifier}"
   role          = aws_iam_role.db_user_generator_lambda_invoke_role.arn
   package_type  = "Image"
-  image_uri = "${local.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
+  image_uri = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ms-db-user-generator:${local.ms_db_user_generator.image_tag}"
   timeout       = 900
 
   vpc_config {
-    subnet_ids         = local.cluster_instances_subnet_ids
+    subnet_ids         = var.cluster_instances_subnet_ids
     security_group_ids = [aws_security_group.lambda_security_group.id]
   }
 
@@ -79,7 +80,7 @@ resource "aws_lambda_function" "db_user_generator_lambda" {
       DB_SECRET_ARN = aws_rds_cluster.cluster.master_user_secret[0].secret_arn
       DB_HOST = aws_rds_cluster.cluster.endpoint
       DB_PORT = 3306
-      DB_NAME = local.database_name
+      DB_NAME = var.database_name
     }
   }
 
@@ -97,14 +98,14 @@ resource "terraform_data" "db_user_generator_lambda_invoke" {
       --function-name ${aws_lambda_function.db_user_generator_lambda.function_name} \
       --region ${data.aws_region.current.name} \
       --cli-binary-format raw-in-base64-out \
-      --payload '{ "username": "${local.database_username}" }' \
+      --payload '{ "username": "${var.database_username}" }' \
       /dev/stdout
     EOT
   }
 }
 
 resource "aws_iam_role" "db_user_generator_lambda_invoke_role" {
-  name = "user-gen-lambda-role-${local.cluster_identifier}"
+  name = "user-gen-lambda-role-${var.cluster_identifier}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -155,8 +156,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_lambda_security_group" {
 }
 
 resource "aws_security_group" "lambda_security_group" {
-  vpc_id = local.cluster_vpc_id
-  name   = "lambda-security-group-${local.cluster_identifier}"
+  vpc_id = var.cluster_vpc_id
+  name   = "lambda-security-group-${var.cluster_identifier}"
 }
 
 resource "aws_vpc_security_group_egress_rule" "lambda_security_group_rule" {
@@ -172,14 +173,14 @@ data "aws_iam_policy_document" "rds_iam_auth" {
     effect = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${data.aws_region.current.name}:${local.account_id}:dbuser:${aws_rds_cluster.cluster.cluster_resource_id}/${local.database_username}"
+      "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.cluster.cluster_resource_id}/${var.database_username}"
     ]
   }
 }
 
 resource "aws_iam_policy" "rds_iam_auth" {
   count = local.create_iam_database_auth ? 1 : 0
-  name   = "rds-iam-auth-${local.cluster_identifier}"
+  name   = "rds-iam-auth-${var.cluster_identifier}"
   policy = data.aws_iam_policy_document.rds_iam_auth[0].json
 }
 
@@ -202,7 +203,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_database_access_client_sec
 // DB Migration(Optional)
 resource "aws_lambda_function" "migration_lambda" {
   count = local.create_migration ? 1 : 0
-  function_name = "migrate-lambda-${local.cluster_identifier}"
+  function_name = "migrate-lambda-${var.cluster_identifier}"
   role          = aws_iam_role.lambda_migration_role[0].arn
   package_type  = "Image"
   // https://qiita.com/Kyohei-takiyama/items/86e71e1f4f989bbfc665
@@ -210,7 +211,7 @@ resource "aws_lambda_function" "migration_lambda" {
   timeout       = 900
 
   vpc_config {
-    subnet_ids         = local.cluster_instances_subnet_ids
+    subnet_ids         = var.cluster_instances_subnet_ids
     security_group_ids = [aws_security_group.lambda_security_group.id]
   }
 
@@ -218,8 +219,8 @@ resource "aws_lambda_function" "migration_lambda" {
     variables = {
       DB_HOST = aws_rds_cluster.cluster.endpoint
       DB_PORT = 3306
-      DB_USER = local.database_username
-      DB_NAME = local.database_name
+      DB_USER = var.database_username
+      DB_NAME = var.database_name
     }
   }
 
@@ -231,7 +232,7 @@ resource "aws_lambda_function" "migration_lambda" {
 
 resource "aws_iam_role" "lambda_migration_role" {
   count = local.create_migration ? 1 : 0
-  name = "lambda-migration-role-${local.cluster_identifier}"
+  name = "lambda-migration-role-${var.cluster_identifier}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

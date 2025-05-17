@@ -8,8 +8,8 @@ resource "aws_cloudfront_vpc_origin" "alb" {
   vpc_origin_endpoint_config {
     name                   = local.vpc_origin_endpoint_config_name
     arn                    = data.aws_alb.private_alb_for_vpc_origin.arn
-    http_port              = local.private_alb_http_port
-    https_port             = local.private_alb_https_port
+    http_port              = var.private_alb_http_port
+    https_port             = var.private_alb_https_port
     origin_protocol_policy = "http-only"
 
     origin_ssl_protocols {
@@ -63,7 +63,7 @@ data "aws_security_group" "private_alb_sg" {
 resource "aws_vpc_security_group_ingress_rule" "vpc_origin" {
   security_group_id            = data.aws_security_group.private_alb_sg.id
   ip_protocol                  = "tcp"
-  from_port                    = local.private_alb_http_port
-  to_port                      = local.private_alb_http_port
+  from_port                    = var.private_alb_http_port
+  to_port                      = var.private_alb_http_port
   referenced_security_group_id = data.aws_security_group.vpc_origin_sg.id
 }
