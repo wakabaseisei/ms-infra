@@ -1,3 +1,3 @@
 # ms-infra
 
-![Image](https://github.com/user-attachments/assets/a221d908-3f03-47f8-bfde-8c5dadfccf6c)
+![Image](https://github.com/user-attachments/assets/eb7e36c9-35f8-40d2-867f-6fb063f682f8)
