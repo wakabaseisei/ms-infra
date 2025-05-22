@@ -3,12 +3,15 @@
 このリポジトリは、MSプロジェクトにおける **AWSインフラ全体をTerraformで構築・管理** するためのリポジトリです。  
 本番・開発環境ともに一貫したコードベースで、再現性とセキュリティ、運用効率を実現しています。
 
+## 📎 インフラ構成図
+
 ![Image](https://github.com/user-attachments/assets/eb7e36c9-35f8-40d2-867f-6fb063f682f8)
 
 
 ---
 
 ## 📁 ディレクトリ構成
+```
 .
 ├── modules/ # 再利用可能なTerraformモジュール群
 │ ├── application/
@@ -26,6 +29,7 @@
 │ ├── ms-web/dev/
 │ └── platform/dev/ # 共通基盤（VPC、EKSなど）の構成
 └── README.md
+```
 
 ---
 
