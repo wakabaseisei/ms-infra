@@ -39,5 +39,5 @@ module "container-orchestration" {
   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   private_route_table_ids = module.vpc.private_route_table_ids
 
-  enable_argocd = true
+  # enable_argocd = true
 }
