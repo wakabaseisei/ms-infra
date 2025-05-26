@@ -225,7 +225,7 @@ resource "aws_lambda_function" "migration_lambda" {
   }
 
   image_config {
-    entry_point = local.migration_lambda.entry_point
+    entry_point = var.migration_lambda.entry_point
     # entry_point = ["/bin/migrate-cli", "up"]
   }
 }
