@@ -21,7 +21,6 @@ module "aurora" {
   reader_instance_classes = [ "db.serverless", "db.serverless" ]
   database_username = local.service_name
   migration_lambda = {
-    # CIで置き換えるため、仮のURLとして設定
     image_url = "148761642613.dkr.ecr.ap-northeast-1.amazonaws.com/ms-user"
     # CIで置き換えるため、仮のタグとして設定
     image_tag = "dev-20250523-200839-dbb5dff"
