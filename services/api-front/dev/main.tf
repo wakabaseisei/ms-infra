@@ -8,7 +8,7 @@ module "application" {
     github_repository_name = local.service_name
 }
 
-# module "gateway" {
-#   source = "../../../modules/gateway"
-#   vpc_origin_prefix = local.service_name
-# }
+module "gateway" {
+  source = "../../../modules/gateway"
+  vpc_origin_prefix = local.service_name
+}
