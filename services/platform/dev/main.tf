@@ -20,8 +20,7 @@ module "vpc" {
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
   database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
 
-  # NOTE: Disable to reduce cost when eks cluster is not used.
-  # enable_nat_gateway = true
+  enable_nat_gateway = true
 
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"
@@ -32,14 +31,13 @@ module "vpc" {
   }
 }
 
-# NOTE: For cost-saving purposes, the unused resources are commented out when they are not in use.
-# module "container-orchestration" {
-#   source = "../../../modules/container-orchestration"
-#   env = local.env
-#   vpc_id = module.vpc.vpc_id
-#   cluster_vpc_subnets = module.vpc.private_subnets
-#   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-#   private_route_table_ids = module.vpc.private_route_table_ids
+module "container-orchestration" {
+  source = "../../../modules/container-orchestration"
+  env = local.env
+  vpc_id = module.vpc.vpc_id
+  cluster_vpc_subnets = module.vpc.private_subnets
+  private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+  private_route_table_ids = module.vpc.private_route_table_ids
 
-#   # enable_argocd = true
-# }
+  enable_argocd = true
+}
