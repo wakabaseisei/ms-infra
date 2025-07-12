@@ -29,6 +29,7 @@ resource "aws_rds_cluster" "cluster" {
 resource "aws_rds_cluster_instance" "writer" {
   cluster_identifier = aws_rds_cluster.cluster.id
   instance_class     = var.writer_instance_class_type
+  promotion_tier     = 0
   engine             = aws_rds_cluster.cluster.engine
   engine_version     = aws_rds_cluster.cluster.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds.name
@@ -36,14 +37,17 @@ resource "aws_rds_cluster_instance" "writer" {
 }
 
 resource "aws_rds_cluster_instance" "reader" {
-  for_each = { for idx, class in var.reader_instance_classes : idx => class }
+  for_each = {
+    for idx, inst in var.reader_instances : idx => inst
+  }
 
-  cluster_identifier = aws_rds_cluster.cluster.id
-  instance_class     = each.value
-  engine             = aws_rds_cluster.cluster.engine
-  engine_version     = aws_rds_cluster.cluster.engine_version
+  cluster_identifier   = aws_rds_cluster.cluster.id
+  instance_class       = each.value.instance_class
+  promotion_tier       = each.value.promotion_tier               # ★
+  engine               = aws_rds_cluster.cluster.engine
+  engine_version       = aws_rds_cluster.cluster.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds.name
-  ca_cert_identifier = local.rds_ca_cert_identifier
+  ca_cert_identifier   = local.rds_ca_cert_identifier
 }
 
 resource "aws_db_subnet_group" "rds" {
