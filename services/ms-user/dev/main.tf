@@ -18,7 +18,16 @@ module "aurora" {
   cluster_vpc_id = data.terraform_remote_state.common.outputs.vpc_id
   cluster_instances_subnet_ids = data.terraform_remote_state.common.outputs.database_subnets
   database_name = local.service_name_letter
-  reader_instance_classes = [ "db.serverless", "db.serverless" ]
+  reader_instances = [
+    {
+      instance_class = "db.serverless"
+      promotion_tier = 1
+    },
+    {
+      instance_class = "db.serverless"
+      promotion_tier = 2
+    }
+  ]
   database_username = local.service_name
   migration_lambda = {
     image_url = "148761642613.dkr.ecr.ap-northeast-1.amazonaws.com/ms-user"
