@@ -6,10 +6,10 @@ module "application" {
 
     namespace = local.service_name
     github_repository_name = local.service_name
-    # eks = {
-    #   service_account_name = local.service_name
-    #   oidc_provider = data.terraform_remote_state.common.outputs.eks_oidc_provider
-    # }
+    eks = {
+      service_account_name = local.service_name
+      oidc_provider = data.terraform_remote_state.common.outputs.eks_oidc_provider
+    }
 }
 
 module "aurora" {
